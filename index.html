@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>IPL Match Predictor | Probability & Statistics Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Barlow+Condensed:ital,wght@0,300;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- ── PARTICLE BACKGROUND ── -->
+<canvas id="particles"></canvas>
+
+<!-- ── HEADER ── -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-icon">◈</span>
+      <div class="logo-text">
+        <span class="logo-main">IPL PREDICTOR</span>
+        <span class="logo-sub">Probability &amp; Statistics Engine · 2008–2025</span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <nav style="display:flex;gap:6px;">
+        <a href="squads.html" style="text-decoration:none;font-family:var(--font-display);font-size:0.85rem;font-weight:600;color:var(--text-dim);border:1px solid var(--border);border-radius:var(--radius);padding:6px 12px;transition:all 0.2s;" onmouseover="this.style.color='var(--cyan)';this.style.borderColor='var(--cyan)'" onmouseout="this.style.color='var(--text-dim)';this.style.borderColor='var(--border)'">👥 SQUADS</a>
+        <a href="venues.html" style="text-decoration:none;font-family:var(--font-display);font-size:0.85rem;font-weight:600;color:var(--text-dim);border:1px solid var(--border);border-radius:var(--radius);padding:6px 12px;transition:all 0.2s;" onmouseover="this.style.color='var(--cyan)';this.style.borderColor='var(--cyan)'" onmouseout="this.style.color='var(--text-dim)';this.style.borderColor='var(--border)'">🏟️ VENUES</a>
+        <a href="methods.html" style="text-decoration:none;font-family:var(--font-display);font-size:0.85rem;font-weight:600;color:var(--text-dim);border:1px solid var(--border);border-radius:var(--radius);padding:6px 12px;transition:all 0.2s;" onmouseover="this.style.color='var(--cyan)';this.style.borderColor='var(--cyan)'" onmouseout="this.style.color='var(--text-dim)';this.style.borderColor='var(--border)'">📐 METHODS</a>
+      </nav>
+      <div class="api-status">
+        <span class="status-dot" id="apiDot"></span>
+        <span id="apiStatusText">Connecting to R API…</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ── MAIN ── -->
+<main>
+
+  <!-- ═══ TEAM SELECTOR ═══ -->
+  <section class="selector-section">
+    <div class="section-label">MATCH SETUP</div>
+    <div class="selector-grid">
+
+      <div class="team-card" id="card-team1">
+        <div class="team-card-label">TEAM 1</div>
+        <select id="sel-team1" class="team-select">
+          <option value="">— Select Team —</option>
+        </select>
+        <div class="team-badge" id="badge1">?</div>
+      </div>
+
+      <div class="vs-block">
+        <div class="vs-ring">
+          <span>VS</span>
+        </div>
+        <div class="venue-wrap">
+          <label class="venue-label">VENUE</label>
+          <select id="sel-venue" class="venue-select">
+            <option value="neutral">— Neutral Ground —</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="team-card" id="card-team2">
+        <div class="team-card-label">TEAM 2</div>
+        <select id="sel-team2" class="team-select">
+          <option value="">— Select Team —</option>
+        </select>
+        <div class="team-badge" id="badge2">?</div>
+      </div>
+
+    </div>
+    <button class="analyse-btn" id="analyseBtn" disabled>
+      <span class="btn-text">⚡ ANALYSE MATCH</span>
+      <span class="btn-shimmer"></span>
+    </button>
+  </section>
+
+  <!-- ═══ RESULTS DASHBOARD ═══ -->
+  <div id="dashboard" class="dashboard hidden">
+
+    <!-- ── Win Probability Bar ── -->
+    <section class="prob-section">
+      <div class="section-label">WIN PROBABILITY · BAYESIAN MODEL</div>
+      <div class="prob-bar-wrap">
+        <div class="prob-label left" id="prob-label-t1">—</div>
+        <div class="prob-bar">
+          <div class="prob-fill t1" id="probFillT1" style="width:50%">
+            <span class="prob-pct" id="probPctT1">50%</span>
+          </div>
+          <div class="prob-fill t2" id="probFillT2" style="width:50%">
+            <span class="prob-pct" id="probPctT2">50%</span>
+          </div>
+        </div>
+        <div class="prob-label right" id="prob-label-t2">—</div>
+      </div>
+      <div class="credible-interval" id="credibleInterval"></div>
+    </section>
+
+    <!-- ── Stats Row ── -->
+    <div class="stats-row">
+      <div class="stat-card" id="statCard1">
+        <div class="stat-title">EXPECTED SCORE</div>
+        <div class="stat-value" id="sc-exp1">—</div>
+        <div class="stat-sub">Poisson λ model</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">HEAD-TO-HEAD</div>
+        <div class="stat-value" id="sc-h2h">—</div>
+        <div class="stat-sub" id="sc-h2h-sub">all time</div>
+      </div>
+      <div class="stat-card" id="statCard2">
+        <div class="stat-title">EXPECTED SCORE</div>
+        <div class="stat-value" id="sc-exp2">—</div>
+        <div class="stat-sub">Poisson λ model</div>
+      </div>
+    </div>
+
+    <!-- ── Model Breakdown ── -->
+    <section class="model-section">
+      <div class="section-label">PROBABILITY MODEL BREAKDOWN</div>
+      <div class="model-grid" id="modelGrid">
+        <!-- JS fills this -->
+      </div>
+    </section>
+
+    <!-- ── Tabs ── -->
+    <div class="tab-bar">
+      <button class="tab active" data-tab="key-players">🎯 KEY MATCHUPS</button>
+      <button class="tab" data-tab="squad1">🏏 SQUAD ANALYSIS</button>
+      <button class="tab" data-tab="squad2">🥎 SQUAD ANALYSIS</button>
+      <button class="tab" data-tab="strategy">📋 MATCH STRATEGY</button>
+      <button class="tab" data-tab="h2h">📊 HEAD-TO-HEAD</button>
+    </div>
+
+    <!-- ── KEY MATCHUPS TAB ── -->
+    <div class="tab-content active" id="tab-key-players">
+      <div class="section-label">STATISTICALLY DOMINANT MATCHUPS · Binomial Test (α=0.05)</div>
+      <div class="matchup-legend">
+        <span class="badge bowler-badge">BOWLER DOMINANT</span>
+        <span class="badge bat-badge">BATSMAN DOMINANT</span>
+        <span class="badge neutral-badge">NEUTRAL</span>
+        <span class="legend-note">★ = p-value &lt; 0.05 (statistically significant)</span>
+      </div>
+      <div id="matchupTable"></div>
+    </div>
+
+    <!-- ── SQUAD 1 TAB ── -->
+    <div class="tab-content" id="tab-squad1">
+      <div class="section-label" id="squad1Label">TEAM 1 SQUAD</div>
+      <div id="squad1Grid" class="squad-grid"></div>
+    </div>
+
+    <!-- ── SQUAD 2 TAB ── -->
+    <div class="tab-content" id="tab-squad2">
+      <div class="section-label" id="squad2Label">TEAM 2 SQUAD</div>
+      <div id="squad2Grid" class="squad-grid"></div>
+    </div>
+
+    <!-- ── STRATEGY TAB ── -->
+    <div class="tab-content" id="tab-strategy">
+      <div class="section-label">MATCH STRATEGY · STATISTICAL RECOMMENDATIONS</div>
+      <div id="strategyPanel"></div>
+    </div>
+
+    <!-- ── H2H TAB ── -->
+    <div class="tab-content" id="tab-h2h">
+      <div class="section-label">HEAD-TO-HEAD HISTORY</div>
+      <div id="h2hPanel"></div>
+    </div>
+
+  </div><!-- /dashboard -->
+
+  <!-- ── LOADING OVERLAY ── -->
+  <div class="loader-overlay hidden" id="loader">
+    <div class="loader-inner">
+      <div class="loader-ring"></div>
+      <div class="loader-text" id="loaderText">Computing probabilities…</div>
+      <div class="loader-steps" id="loaderSteps"></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <p>IPL Predictor · 2nd Year CS Undergraduate Project · Built with R (Plumber) + Vanilla JS</p>
+  <p>Statistical models: Bayesian Beta, Poisson Run-Rate, Binomial Matchup Test, Composite Impact Score</p>
+</footer>
+
+<script src="js/squad_data.js"></script>
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
