@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>IPL 2026 Venue Stats | IPL Predictor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Barlow+Condensed:ital,wght@0,300;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/style.css"/>
+<style>
+.venue-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+.venue-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color 0.3s, transform 0.2s;
+}
+.venue-card:hover { border-color: var(--cyan-dim); transform: translateY(-2px); }
+.venue-header {
+  background: linear-gradient(135deg, var(--bg3), var(--bg2));
+  border-bottom: 1px solid var(--border);
+  padding: 16px 20px;
+  position: relative;
+  overflow: hidden;
+}
+.venue-header::before {
+  content: "🏟️";
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 2.5rem;
+  opacity: 0.15;
+}
+.venue-name {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+.venue-city {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  color: var(--cyan);
+}
+.venue-body { padding: 16px 20px; }
+.venue-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+}
+.venue-stat-row:last-child { border-bottom: none; }
+.vsr-label { color: var(--text-dim); }
+.vsr-val   { color: var(--text); font-weight: 700; }
+.vsr-val.good   { color: var(--green); }
+.vsr-val.warn   { color: var(--gold); }
+.vsr-val.info   { color: var(--cyan); }
+
+.toss-indicator {
+  display: flex;
+  gap: 4px;
+  margin-top: 12px;
+}
+.toss-seg {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  transition: opacity 0.3s;
+}
+.toss-legend {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+.hosted-by {
+  margin-top: 10px;
+  padding: 6px 8px;
+  background: var(--bg3);
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--text-dim);
+}
+.hosted-team {
+  font-weight: 700;
+}
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-icon">◈</span>
+      <div class="logo-text">
+        <span class="logo-main">VENUE STATISTICS</span>
+        <span class="logo-sub">IPL 2026 · 13 Host Venues · Historical Analysis</span>
+      </div>
+    </div>
+    <nav style="display:flex;gap:8px;">
+      <a href="index.html" class="tab" style="text-decoration:none;display:flex;align-items:center;padding:8px 14px;font-family:var(--font-display);font-size:0.85rem;font-weight:600;color:var(--text-dim);border:1px solid var(--border);border-radius:var(--radius)" onmouseover="this.style.color='var(--cyan)';this.style.borderColor='var(--cyan)'" onmouseout="this.style.color='var(--text-dim)';this.style.borderColor='var(--border)'">⚡ PREDICTOR</a>
+      <a href="squads.html" class="tab" style="text-decoration:none;display:flex;align-items:center;padding:8px 14px;font-family:var(--font-display);font-size:0.85rem;font-weight:600;color:var(--text-dim);border:1px solid var(--border);border-radius:var(--radius)" onmouseover="this.style.color='var(--cyan)';this.style.borderColor='var(--cyan)'" onmouseout="this.style.color='var(--text-dim)';this.style.borderColor='var(--border)'">👥 SQUADS</a>
+      <span class="tab" style="display:flex;align-items:center;padding:8px 14px;font-family:var(--font-display);font-size:0.85rem;font-weight:600;color:var(--cyan);border:1px solid var(--cyan);border-radius:var(--radius);background:var(--cyan-dim);cursor:default">🏟️ VENUES</span>
+      <a href="methods.html" class="tab" style="text-decoration:none;display:flex;align-items:center;padding:8px 14px;font-family:var(--font-display);font-size:0.85rem;font-weight:600;color:var(--text-dim);border:1px solid var(--border);border-radius:var(--radius)" onmouseover="this.style.color='var(--cyan)';this.style.borderColor='var(--cyan)'" onmouseout="this.style.color='var(--text-dim)';this.style.borderColor='var(--border)'">📐 METHODS</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="section-label">IPL 2026 HOST VENUES · HISTORICAL PITCH & CONDITIONS DATA</div>
+  <p style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text-muted);margin-bottom:24px">
+    Stats based on IPL matches 2008–2025. Bat-first win % and avg scores are used in the Poisson model.
+  </p>
+  <div class="venue-grid" id="venueGrid"></div>
+</main>
+
+<footer>
+  <p>Venue data compiled from IPL historical records 2008–2025 · Used in prediction model</p>
+</footer>
+
+<script src="js/charts.js"></script>
+<script>
+// ── Venue database with historical IPL stats ──────────────────
+const VENUES = [
+  {
+    name: "Wankhede Stadium",
+    city: "Mumbai",
+    state: "Maharashtra",
+    capacity: 33108,
+    host_team: "Mumbai Indians",
+    host_short: "MI",
+    ipl_matches: 108,
+    avg_first_innings: 172,
+    avg_second_innings: 155,
+    bat_first_win_pct: 42,
+    field_first_win_pct: 58,
+    highest_score: 235,
+    lowest_defended: 131,
+    pitch_type: "Batting Paradise",
+    pitch_desc: "True pitch with even bounce. Helps batsmen but conditions change later. Chasing is preferred due to dew.",
+    toss_recommendation: "Field First",
+    key_factor: "Dew effect in evening games heavily favours the team chasing",
+    six_rate: 8.2,
+    boundary_pct: 52,
+    avg_wickets_pp: 1.4
+  },
+  {
+    name: "M. A. Chidambaram Stadium",
+    city: "Chennai",
+    state: "Tamil Nadu",
+    capacity: 50000,
+    host_team: "Chennai Super Kings",
+    host_short: "CSK",
+    ipl_matches: 96,
+    avg_first_innings: 162,
+    avg_second_innings: 148,
+    bat_first_win_pct: 57,
+    field_first_win_pct: 43,
+    highest_score: 246,
+    lowest_defended: 119,
+    pitch_type: "Spin-Friendly",
+    pitch_desc: "Dry, slow surface that grips. Spinners are invaluable here. Scores tend to be low and batting first is favoured.",
+    toss_recommendation: "Bat First",
+    key_factor: "Spinners take more than 60% of wickets at this venue",
+    six_rate: 5.1,
+    boundary_pct: 43,
+    avg_wickets_pp: 1.9
+  },
+  {
+    name: "Eden Gardens",
+    city: "Kolkata",
+    state: "West Bengal",
+    capacity: 68000,
+    host_team: "Kolkata Knight Riders",
+    host_short: "KKR",
+    ipl_matches: 102,
+    avg_first_innings: 168,
+    avg_second_innings: 152,
+    bat_first_win_pct: 54,
+    field_first_win_pct: 46,
+    highest_score: 222,
+    lowest_defended: 128,
+    pitch_type: "Balanced",
+    pitch_desc: "Good batting surface with some assistance for pace early on. Gets slower as match progresses. Morning dew can be a factor.",
+    toss_recommendation: "Bat First",
+    key_factor: "Largest IPL venue — crowd pressure can be decisive",
+    six_rate: 6.4,
+    boundary_pct: 47,
+    avg_wickets_pp: 1.6
+  },
+  {
+    name: "M. Chinnaswamy Stadium",
+    city: "Bengaluru",
+    state: "Karnataka",
+    capacity: 40000,
+    host_team: "Royal Challengers Bengaluru",
+    host_short: "RCB",
+    ipl_matches: 86,
+    avg_first_innings: 183,
+    avg_second_innings: 164,
+    bat_first_win_pct: 47,
+    field_first_win_pct: 53,
+    highest_score: 263,
+    lowest_defended: 141,
+    pitch_type: "Batting Paradise",
+    pitch_desc: "High altitude (920m). Ball carries exceptionally well. One of the highest-scoring venues in IPL. Extreme batting conditions.",
+    toss_recommendation: "Field First",
+    key_factor: "Altitude causes the ball to travel further — sixes are frequent",
+    six_rate: 10.3,
+    boundary_pct: 57,
+    avg_wickets_pp: 1.2
+  },
+  {
+    name: "Arun Jaitley Stadium",
+    city: "Delhi",
+    state: "Delhi",
+    capacity: 40000,
+    host_team: "Delhi Capitals",
+    host_short: "DC",
+    ipl_matches: 91,
+    avg_first_innings: 170,
+    avg_second_innings: 156,
+    bat_first_win_pct: 51,
+    field_first_win_pct: 49,
+    highest_score: 231,
+    lowest_defended: 125,
+    pitch_type: "Balanced",
+    pitch_desc: "Even pace and bounce. Good for both batters and bowlers. Smog/pollution can occasionally affect conditions.",
+    toss_recommendation: "Bat First",
+    key_factor: "Very balanced — toss less decisive than other venues",
+    six_rate: 6.8,
+    boundary_pct: 48,
+    avg_wickets_pp: 1.7
+  },
+  {
+    name: "Rajiv Gandhi Intl. Cricket Stadium",
+    city: "Hyderabad",
+    state: "Telangana",
+    capacity: 38000,
+    host_team: "Sunrisers Hyderabad",
+    host_short: "SRH",
+    ipl_matches: 78,
+    avg_first_innings: 167,
+    avg_second_innings: 152,
+    bat_first_win_pct: 56,
+    field_first_win_pct: 44,
+    highest_score: 219,
+    lowest_defended: 135,
+    pitch_type: "Pace-Friendly",
+    pitch_desc: "Good pace and carry, especially in early overs. Gets slower later. Outright pacers and cutters are effective here.",
+    toss_recommendation: "Bat First",
+    key_factor: "Overhead conditions often overcast — helps swing bowlers",
+    six_rate: 6.0,
+    boundary_pct: 45,
+    avg_wickets_pp: 1.8
+  },
+  {
+    name: "Punjab Cricket Association IS Bindra Stadium",
+    city: "Mohali",
+    state: "Punjab",
+    capacity: 26950,
+    host_team: "Punjab Kings",
+    host_short: "PBKS",
+    ipl_matches: 58,
+    avg_first_innings: 173,
+    avg_second_innings: 157,
+    bat_first_win_pct: 49,
+    field_first_win_pct: 51,
+    highest_score: 221,
+    lowest_defended: 134,
+    pitch_type: "Batting Friendly",
+    pitch_desc: "Good batting surface with true bounce. Outfield is fast. Both pace and spin can be effective depending on match phase.",
+    toss_recommendation: "Field First",
+    key_factor: "Fast outfield means even mishits can go for boundaries",
+    six_rate: 7.2,
+    boundary_pct: 50,
+    avg_wickets_pp: 1.5
+  },
+  {
+    name: "Sawai Mansingh Stadium",
+    city: "Jaipur",
+    state: "Rajasthan",
+    capacity: 30000,
+    host_team: "Rajasthan Royals",
+    host_short: "RR",
+    ipl_matches: 62,
+    avg_first_innings: 166,
+    avg_second_innings: 150,
+    bat_first_win_pct: 55,
+    field_first_win_pct: 45,
+    highest_score: 218,
+    lowest_defended: 127,
+    pitch_type: "Spin-Friendly",
+    pitch_desc: "Dry conditions favour spinners, especially in the latter half. Batting first is advisable as pitch turns more as match progresses.",
+    toss_recommendation: "Bat First",
+    key_factor: "Dry Jaipur air means the ball doesn't swing but grip increases",
+    six_rate: 5.8,
+    boundary_pct: 44,
+    avg_wickets_pp: 1.8
+  },
+  {
+    name: "BRSABV Ekana Cricket Stadium",
+    city: "Lucknow",
+    state: "Uttar Pradesh",
+    capacity: 50000,
+    host_team: "Lucknow Super Giants",
+    host_short: "LSG",
+    ipl_matches: 30,
+    avg_first_innings: 171,
+    avg_second_innings: 153,
+    bat_first_win_pct: 53,
+    field_first_win_pct: 47,
+    highest_score: 214,
+    lowest_defended: 140,
+    pitch_type: "Balanced",
+    pitch_desc: "Relatively new IPL venue. Excellent facilities. Good batting surface with some early movement for pace bowlers.",
+    toss_recommendation: "Bat First",
+    key_factor: "Still gathering historical data — teams with strong bowling tend to do well",
+    six_rate: 6.5,
+    boundary_pct: 46,
+    avg_wickets_pp: 1.6
+  },
+  {
+    name: "Narendra Modi Stadium",
+    city: "Ahmedabad",
+    state: "Gujarat",
+    capacity: 132000,
+    host_team: "Gujarat Titans",
+    host_short: "GT",
+    ipl_matches: 28,
+    avg_first_innings: 174,
+    avg_second_innings: 157,
+    bat_first_win_pct: 50,
+    field_first_win_pct: 50,
+    highest_score: 227,
+    lowest_defended: 145,
+    pitch_type: "Balanced",
+    pitch_desc: "The world's largest cricket stadium. New drop-in pitches. Good carry. Both pace and spin have been effective.",
+    toss_recommendation: "Bat First",
+    key_factor: "New pitch strips — consistent bounce makes stroke play effective",
+    six_rate: 7.0,
+    boundary_pct: 49,
+    avg_wickets_pp: 1.5
+  },
+  {
+    name: "Himachal Pradesh Cricket Association Stadium",
+    city: "Dharamshala",
+    state: "Himachal Pradesh",
+    capacity: 25000,
+    host_team: "Punjab Kings",
+    host_short: "PBKS",
+    ipl_matches: 20,
+    avg_first_innings: 176,
+    avg_second_innings: 155,
+    bat_first_win_pct: 55,
+    field_first_win_pct: 45,
+    highest_score: 223,
+    lowest_defended: 148,
+    pitch_type: "Batting Paradise",
+    pitch_desc: "High altitude stadium with stunning Himalayan backdrop. Thin air means balls travel further. Excellent batting conditions.",
+    toss_recommendation: "Bat First",
+    key_factor: "Altitude (1457m) — highest IPL venue, ball carries significantly",
+    six_rate: 9.1,
+    boundary_pct: 54,
+    avg_wickets_pp: 1.3
+  },
+  {
+    name: "Barsapara Cricket Stadium",
+    city: "Guwahati",
+    state: "Assam",
+    capacity: 40000,
+    host_team: null,
+    host_short: null,
+    ipl_matches: 12,
+    avg_first_innings: 169,
+    avg_second_innings: 151,
+    bat_first_win_pct: 58,
+    field_first_win_pct: 42,
+    highest_score: 207,
+    lowest_defended: 142,
+    pitch_type: "Humid/Spin",
+    pitch_desc: "Hot, humid North-East conditions. Spin can be effective, especially with afternoon humidity. Dew factor significant in evening games.",
+    toss_recommendation: "Bat First",
+    key_factor: "High humidity — spinners with good grip can dominate",
+    six_rate: 5.8,
+    boundary_pct: 44,
+    avg_wickets_pp: 1.9
+  },
+  {
+    name: "Shaheed Veer Narayan Singh International Stadium",
+    city: "Raipur",
+    state: "Chhattisgarh",
+    capacity: 65000,
+    host_team: null,
+    host_short: null,
+    ipl_matches: 8,
+    avg_first_innings: 170,
+    avg_second_innings: 152,
+    bat_first_win_pct: 50,
+    field_first_win_pct: 50,
+    highest_score: 201,
+    lowest_defended: 138,
+    pitch_type: "Balanced",
+    pitch_desc: "Relatively new IPL venue. Good pitch for batting with some help for pacers early on.",
+    toss_recommendation: "Bat First",
+    key_factor: "Limited data — teams with all-round ability tend to adapt well",
+    six_rate: 6.2,
+    boundary_pct: 46,
+    avg_wickets_pp: 1.6
+  }
+];
+
+const PITCH_COLORS = {
+  "Batting Paradise": "#ff9900",
+  "Spin-Friendly":    "#aa66ff",
+  "Balanced":         "#00e676",
+  "Pace-Friendly":    "#00e5ff",
+  "Humid/Spin":       "#ff6644"
+};
+
+const TEAM_COLORS_MAP = {
+  CSK:"#ffd740",MI:"#1e88e5",RCB:"#e53935",KKR:"#aa44ff",
+  SRH:"#ff6600",DC:"#2244ff",RR:"#ff44aa",LSG:"#00d4aa",
+  GT:"#00aaff",PBKS:"#dd2222"
+};
+
+function buildVenueGrid() {
+  const grid = document.getElementById("venueGrid");
+  grid.innerHTML = VENUES.map(v => {
+    const ptColor = PITCH_COLORS[v.pitch_type] || "#607080";
+    const teamColor = v.host_short ? (TEAM_COLORS_MAP[v.host_short] || "#00e5ff") : "#607080";
+    const tossColor = v.toss_recommendation === "Bat First" ? "#ffd740" : "#00e5ff";
+    const batW = v.bat_first_win_pct;
+    const fieldW = v.field_first_win_pct;
+
+    return `
+      <div class="venue-card">
+        <div class="venue-header">
+          <div class="venue-name">${v.name}</div>
+          <div class="venue-city">${v.city.toUpperCase()} · ${v.state.toUpperCase()} · Capacity: ${v.capacity.toLocaleString()}</div>
+        </div>
+        <div class="venue-body">
+          <div class="venue-stat-row">
+            <span class="vsr-label">PITCH TYPE</span>
+            <span class="vsr-val" style="color:${ptColor}">${v.pitch_type}</span>
+          </div>
+          <div class="venue-stat-row">
+            <span class="vsr-label">IPL MATCHES HOSTED</span>
+            <span class="vsr-val info">${v.ipl_matches}</span>
+          </div>
+          <div class="venue-stat-row">
+            <span class="vsr-label">AVG 1ST INNINGS SCORE</span>
+            <span class="vsr-val warn">${v.avg_first_innings}</span>
+          </div>
+          <div class="venue-stat-row">
+            <span class="vsr-label">AVG 2ND INNINGS SCORE</span>
+            <span class="vsr-val">${v.avg_second_innings}</span>
+          </div>
+          <div class="venue-stat-row">
+            <span class="vsr-label">HIGHEST IPL SCORE</span>
+            <span class="vsr-val good">${v.highest_score}</span>
+          </div>
+          <div class="venue-stat-row">
+            <span class="vsr-label">LOWEST TOTAL DEFENDED</span>
+            <span class="vsr-val">${v.lowest_defended}</span>
+          </div>
+          <div class="venue-stat-row">
+            <span class="vsr-label">SIX RATE (per over)</span>
+            <span class="vsr-val warn">${v.six_rate}</span>
+          </div>
+          <div class="venue-stat-row">
+            <span class="vsr-label">BOUNDARY %</span>
+            <span class="vsr-val">${v.boundary_pct}%</span>
+          </div>
+          <div class="venue-stat-row">
+            <span class="vsr-label">AVG WKTS IN POWERPLAY</span>
+            <span class="vsr-val">${v.avg_wickets_pp}</span>
+          </div>
+          <div class="venue-stat-row">
+            <span class="vsr-label">TOSS RECOMMENDATION</span>
+            <span class="vsr-val" style="color:${tossColor}">▶ ${v.toss_recommendation.toUpperCase()}</span>
+          </div>
+
+          <div style="margin-top:12px">
+            <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--text-dim);margin-bottom:6px;letter-spacing:0.1em">BAT FIRST vs FIELD FIRST WIN %</div>
+            <div class="toss-indicator">
+              <div class="toss-seg" style="background:#ffd740;flex:${batW}" title="Bat First: ${batW}%"></div>
+              <div class="toss-seg" style="background:#00e5ff;flex:${fieldW}" title="Field First: ${fieldW}%"></div>
+            </div>
+            <div class="toss-legend">
+              <span style="color:#ffd740">🏏 Bat First ${batW}%</span>
+              <span style="color:#00e5ff">🎯 Field First ${fieldW}%</span>
+            </div>
+          </div>
+
+          <div style="margin-top:10px;padding:8px;background:var(--bg3);border-radius:4px;font-family:var(--font-body);font-size:0.85rem;color:var(--text-dim);line-height:1.4">
+            ${v.pitch_desc}
+          </div>
+
+          <div style="margin-top:8px;padding:6px 8px;background:var(--bg3);border-radius:4px;border-left:2px solid var(--gold)">
+            <div style="font-family:var(--font-mono);font-size:0.58rem;color:var(--text-muted);letter-spacing:0.1em;margin-bottom:2px">KEY FACTOR</div>
+            <div style="font-family:var(--font-body);font-size:0.82rem;color:var(--text)">${v.key_factor}</div>
+          </div>
+
+          ${v.host_team ? `
+          <div class="hosted-by">
+            🏠 Home Ground:
+            <span class="hosted-team" style="color:${teamColor}">${v.host_team} (${v.host_short})</span>
+          </div>` : `
+          <div class="hosted-by" style="color:var(--text-muted)">🏟️ Neutral venue for IPL 2026</div>`}
+        </div>
+      </div>`;
+  }).join("");
+}
+
+buildVenueGrid();
+</script>
+</body>
+</html>

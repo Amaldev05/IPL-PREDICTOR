@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Statistical Methods | IPL Predictor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Barlow+Condensed:ital,wght@0,300;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/style.css"/>
+<style>
+.mod-nav { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:28px; }
+.mod-nav-btn {
+  font-family:var(--font-mono); font-size:0.62rem; font-weight:700;
+  letter-spacing:0.08em; padding:6px 12px;
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:var(--radius); color:var(--text-dim);
+  cursor:pointer; transition:all 0.2s; text-decoration:none;
+}
+.mod-nav-btn:hover { color:var(--cyan); border-color:var(--cyan); background:var(--cyan-dim); }
+
+.module-section { margin-bottom:40px; scroll-margin-top:80px; }
+.module-header {
+  display:flex; align-items:center; gap:16px;
+  background:linear-gradient(90deg, var(--bg3) 0%, var(--bg2) 100%);
+  border:1px solid var(--border); border-left:4px solid var(--cyan);
+  border-radius:var(--radius); padding:18px 24px; margin-bottom:20px;
+}
+.module-header.gold   { border-left-color:var(--gold); }
+.module-header.green  { border-left-color:var(--green); }
+.module-header.red    { border-left-color:var(--red); }
+.module-header.purple { border-left-color:#b388ff; }
+.module-header.orange { border-left-color:#ff9966; }
+.module-num {
+  font-family:var(--font-display); font-size:2.5rem; font-weight:700;
+  color:var(--cyan); opacity:0.4; line-height:1; min-width:52px;
+}
+.module-header.gold   .module-num { color:var(--gold); }
+.module-header.green  .module-num { color:var(--green); }
+.module-header.red    .module-num { color:var(--red); }
+.module-header.purple .module-num { color:#b388ff; }
+.module-header.orange .module-num { color:#ff9966; }
+.module-title { font-family:var(--font-display); font-size:1.35rem; font-weight:700; color:var(--text); line-height:1.2; }
+.module-co { font-family:var(--font-mono); font-size:0.6rem; letter-spacing:0.15em; color:var(--text-muted); margin-top:4px; }
+.module-icon { font-size:2.2rem; }
+
+.topic-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(480px,1fr)); gap:18px; }
+.topic-card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; transition:border-color 0.2s; }
+.topic-card:hover { border-color:var(--cyan); }
+.topic-card-header { padding:12px 18px; background:var(--bg3); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+.topic-num { font-family:var(--font-mono); font-size:0.6rem; color:var(--cyan); background:var(--cyan-dim); padding:2px 7px; border-radius:3px; border:1px solid var(--cyan); }
+.topic-name { font-family:var(--font-display); font-size:1rem; font-weight:700; color:var(--text); }
+.bloom-tag { margin-left:auto; font-family:var(--font-mono); font-size:0.58rem; letter-spacing:0.1em; padding:2px 8px; border-radius:3px; border:1px solid; font-weight:700; }
+.bloom-remember  { color:#80cbc4; border-color:#80cbc4; background:rgba(128,203,196,0.08); }
+.bloom-understand{ color:#81d4fa; border-color:#81d4fa; background:rgba(129,212,250,0.08); }
+.bloom-apply     { color:var(--gold); border-color:var(--gold); background:rgba(255,214,0,0.08); }
+.bloom-analyze   { color:#cf94da; border-color:#cf94da; background:rgba(207,148,218,0.08); }
+.topic-body { padding:16px 18px; }
+.topic-body p { font-family:var(--font-body); font-size:0.9rem; color:var(--text-dim); line-height:1.65; margin-bottom:10px; }
+.topic-body p:last-child { margin-bottom:0; }
+.topic-body strong { color:var(--text); }
+.ipl-tag { display:inline-block; font-family:var(--font-mono); font-size:0.58rem; background:rgba(0,180,255,0.1); border:1px solid var(--cyan); color:var(--cyan); padding:2px 8px; border-radius:3px; margin-bottom:8px; letter-spacing:0.08em; }
+
+.formula-box { background:var(--bg3); border:1px solid var(--border); border-left:3px solid var(--cyan); border-radius:4px; padding:12px 16px; margin:10px 0; font-family:var(--font-mono); font-size:0.75rem; color:var(--text); line-height:1.9; }
+.formula-box .var { color:var(--gold); }
+.formula-box .op  { color:var(--cyan); }
+.formula-box .comment { color:var(--text-muted); font-size:0.66rem; }
+.r-snippet { background:#050a0f; border:1px solid var(--border); border-radius:4px; padding:12px 16px; margin:10px 0; font-family:var(--font-mono); font-size:0.7rem; color:#a8d8a8; line-height:1.7; overflow-x:auto; }
+.r-snippet .keyword { color:#ff9966; }
+.r-snippet .fn      { color:#66ccff; }
+.r-snippet .num     { color:#ffcc66; }
+.r-snippet .comment { color:#607080; font-style:italic; }
+.assumption-list { list-style:none; padding:0; margin:8px 0; }
+.assumption-list li { font-family:var(--font-mono); font-size:0.67rem; color:var(--text-dim); padding:3px 0; border-bottom:1px solid var(--border); }
+.assumption-list li::before { content:"→ "; color:var(--cyan); }
+
+.method-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(500px,1fr)); gap:24px; margin-top:20px; }
+.method-card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+.method-header { background:linear-gradient(90deg,var(--bg3),var(--bg2)); border-bottom:1px solid var(--border); padding:16px 20px; display:flex; align-items:center; gap:14px; }
+.method-icon { font-size:2rem; }
+.method-name { font-family:var(--font-display); font-size:1.2rem; font-weight:700; color:var(--cyan); }
+.method-tag  { font-family:var(--font-mono); font-size:0.6rem; letter-spacing:0.15em; color:var(--text-muted); margin-top:2px; }
+.method-body { padding:20px; }
+.method-body p { font-family:var(--font-body); font-size:0.95rem; color:var(--text-dim); line-height:1.6; margin-bottom:12px; }
+.method-body strong { color:var(--text); }
+.model-pipeline { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:16px 0; font-family:var(--font-mono); font-size:0.65rem; }
+.pipe-step { background:var(--bg3); border:1px solid var(--border); border-radius:4px; padding:6px 10px; color:var(--text); text-align:center; }
+.pipe-arrow { color:var(--cyan); font-size:1rem; }
+.pipe-step.highlight { border-color:var(--gold); color:var(--gold); }
+.weight-viz { display:flex; gap:8px; margin:12px 0; align-items:center; }
+.weight-seg { height:28px; border-radius:4px; display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:0.65rem; font-weight:700; color:#000; }
+</style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-icon">◈</span>
+      <div class="logo-text">
+        <span class="logo-main">STATISTICAL METHODS</span>
+        <span class="logo-sub">Course Syllabus · Applied Through IPL Predictor</span>
+      </div>
+    </div>
+    <nav style="display:flex;gap:6px">
+      <a href="index.html" style="text-decoration:none;font-family:var(--font-display);font-size:0.85rem;font-weight:600;color:var(--text-dim);border:1px solid var(--border);border-radius:var(--radius);padding:6px 12px" onmouseover="this.style.color='var(--cyan)';this.style.borderColor='var(--cyan)'" onmouseout="this.style.color='var(--text-dim)';this.style.borderColor='var(--border)'">⚡ PREDICTOR</a>
+      <a href="squads.html" style="text-decoration:none;font-family:var(--font-display);font-size:0.85rem;font-weight:600;color:var(--text-dim);border:1px solid var(--border);border-radius:var(--radius);padding:6px 12px" onmouseover="this.style.color='var(--cyan)';this.style.borderColor='var(--cyan)'" onmouseout="this.style.color='var(--text-dim)';this.style.borderColor='var(--border)'">👥 SQUADS</a>
+      <a href="venues.html" style="text-decoration:none;font-family:var(--font-display);font-size:0.85rem;font-weight:600;color:var(--text-dim);border:1px solid var(--border);border-radius:var(--radius);padding:6px 12px" onmouseover="this.style.color='var(--cyan)';this.style.borderColor='var(--cyan)'" onmouseout="this.style.color='var(--text-dim)';this.style.borderColor='var(--border)'">🏟️ VENUES</a>
+      <span style="font-family:var(--font-display);font-size:0.85rem;font-weight:600;color:var(--cyan);border:1px solid var(--cyan);border-radius:var(--radius);padding:6px 12px;background:var(--cyan-dim)">📐 METHODS</span>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="section-label">PROBABILITY &amp; STATISTICS · FULL COURSE SYLLABUS APPLIED TO IPL DATA</div>
+  <p style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text-muted);margin-bottom:18px">
+    Every concept from the 7-module course syllabus is demonstrated through real IPL prediction problems. Bloom's taxonomy level shown for each topic.
+  </p>
+
+  <!-- Quick Nav -->
+  <div class="mod-nav">
+    <a class="mod-nav-btn" href="#mod1">01 · Intro to Statistics</a>
+    <a class="mod-nav-btn" href="#mod2">02 · Random Variables</a>
+    <a class="mod-nav-btn" href="#mod3">03 · Correlation &amp; Regression</a>
+    <a class="mod-nav-btn" href="#mod4">04 · Probability Distributions</a>
+    <a class="mod-nav-btn" href="#mod5">05 · Hypothesis Testing I</a>
+    <a class="mod-nav-btn" href="#mod6">06 · Hypothesis Testing II</a>
+    <a class="mod-nav-btn" href="#mod7">07 · Reliability</a>
+  </div>
+
+  <!-- PIPELINE -->
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:36px">
+    <div class="section-label">ENSEMBLE PREDICTION PIPELINE</div>
+    <div class="model-pipeline">
+      <div class="pipe-step">H2H Records<br/><span style="color:var(--text-muted)">2008–2025</span></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step highlight">Bayesian Beta<br/><span style="color:var(--text-muted)">Win Prob</span></div>
+      <div class="pipe-arrow">+</div>
+      <div class="pipe-step">Innings Data<br/><span style="color:var(--text-muted)">deliveries.csv</span></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step highlight">Poisson λ<br/><span style="color:var(--text-muted)">Expected Score</span></div>
+      <div class="pipe-arrow">+</div>
+      <div class="pipe-step">Venue History<br/><span style="color:var(--text-muted)">matches.csv</span></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step highlight">Venue Factor<br/><span style="color:var(--text-muted)">Win Rate</span></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step highlight" style="border-color:var(--cyan);color:var(--cyan)">Weighted Ensemble<br/><span style="color:var(--text-muted)">Final Probability</span></div>
+    </div>
+    <div class="weight-viz">
+      <div class="weight-seg" style="flex:40;background:var(--gold)">H2H 40%</div>
+      <div class="weight-seg" style="flex:35;background:#00b4ff">Run-Rate 35%</div>
+      <div class="weight-seg" style="flex:25;background:#00e676">Venue 25%</div>
+    </div>
+    <div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--text-muted)">
+      P(Team1 wins) = 0.40 × P_bayesian + 0.35 × P_poisson + 0.25 × P_venue
+    </div>
+  </div>
+
+
+  <!-- ═══ MODULE 1 ═══ -->
+  <section class="module-section" id="mod1">
+    <div class="module-header">
+      <div class="module-num">01</div>
+      <div class="module-icon">📊</div>
+      <div>
+        <div class="module-title">Introduction to Statistics</div>
+        <div class="module-co">CO: 1 · Data Analysis &amp; Descriptive Methods</div>
+      </div>
+    </div>
+    <div class="topic-grid">
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">1.1</span>
+          <span class="topic-name">Introduction &amp; Data Analysis</span>
+          <span class="bloom-tag bloom-remember">REMEMBER</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · DATASET STRUCTURE</div>
+          <p>The IPL predictor ingests two primary datasets — <strong>matches.csv</strong> (one row per match, 2008–2025) and <strong>deliveries.csv</strong> (one row per ball bowled). Understanding how raw data is collected, structured and classified is the first step of any statistical analysis.</p>
+          <p><strong>Types of data in our dataset:</strong> Match results are <em>categorical</em> (win/loss); runs scored are <em>discrete quantitative</em>; bowling economy rate is <em>continuous quantitative</em>; toss decision is <em>nominal</em>; match year is <em>ordinal</em>.</p>
+          <p><strong>Pipeline:</strong> Raw CSVs → cleaning (removing no-result / DLS matches) → feature engineering (run rate, win%) → statistical modelling → prediction output.</p>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">1.2</span>
+          <span class="topic-name">Measures of Central Tendency</span>
+          <span class="bloom-tag bloom-understand">UNDERSTAND</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · TEAM SCORING AVERAGES</div>
+          <p>The Poisson model's core parameter λ is the <strong>mean run-rate</strong> across all historical innings. Central tendency measures tell us where a team's scoring is "centred."</p>
+          <div class="formula-box">
+<span class="comment">// Mean run-rate (used as λ in Poisson model):</span>
+<span class="var">x̄</span> = (1/n) × Σ (runs_i / 20)   <span class="comment">// over all innings i</span>
+
+<span class="comment">// Median: robust to blowout innings (e.g. 250+ totals)</span>
+<span class="var">M</span> = middle value of sorted run-rates
+
+<span class="comment">// Mode: most frequent score bracket</span>
+<span class="comment">// Used to identify a team's "typical" total</span>
+          </div>
+          <p><strong>Why mean over median?</strong> Poisson uses arithmetic mean as its MLE estimator. However for skewed innings distributions the median gives a more robust picture. We check both in the data quality step.</p>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">1.3</span>
+          <span class="topic-name">Measures of Dispersion</span>
+          <span class="bloom-tag bloom-understand">UNDERSTAND</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · SCORE VARIABILITY &amp; CONSISTENCY</div>
+          <p>Dispersion measures quantify how <strong>consistent</strong> a team's scoring is. A team with low variance is predictable; high variance teams are "boom or bust." Both affect prediction confidence intervals.</p>
+          <div class="formula-box">
+<span class="comment">// Sample variance of run-rates:</span>
+<span class="var">s²</span> = Σ(xᵢ - x̄)² / (n-1)
+
+<span class="comment">// Standard deviation:</span>
+<span class="var">s</span>  = √s²
+
+<span class="comment">// Coefficient of variation (dimensionless consistency):</span>
+<span class="var">CV</span> = (s / x̄) × 100%   <span class="comment">// lower = more consistent</span>
+
+<span class="comment">// Poisson model: SD of predicted score = √(λ × 20)</span>
+<span class="comment">// Because Poisson variance = mean = λ</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">1.4</span>
+          <span class="topic-name">Moments · Skewness · Kurtosis</span>
+          <span class="bloom-tag bloom-understand">UNDERSTAND</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · SHAPE OF SCORE DISTRIBUTIONS</div>
+          <p>IPL scores are rarely symmetric. Teams batting at Wankhede (batting-friendly) show <strong>left-skewed</strong> distributions; spin-friendly Chennai shows <strong>right-skewed</strong> distributions (scores cluster low).</p>
+          <div class="formula-box">
+<span class="comment">// r-th central moment:</span>
+<span class="var">μᵣ</span> = (1/n) Σ (xᵢ - x̄)ʳ
+
+<span class="comment">// Skewness (3rd standardised moment):</span>
+<span class="var">γ₁</span> = μ₃ / σ³
+<span class="comment">// +ve → right-skewed (low scores), -ve → left-skewed</span>
+
+<span class="comment">// Kurtosis (4th standardised moment):</span>
+<span class="var">γ₂</span> = μ₄ / σ⁴ - 3
+<span class="comment">// High kurtosis → extreme scores occur more than Normal predicts</span>
+<span class="comment">// Important for adjusting venue factor in the model</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ═══ MODULE 2 ═══ -->
+  <section class="module-section" id="mod2">
+    <div class="module-header gold">
+      <div class="module-num">02</div>
+      <div class="module-icon">🎲</div>
+      <div>
+        <div class="module-title">Random Variables</div>
+        <div class="module-co">CO: 2 · Probability Theory &amp; Stochastic Modelling</div>
+      </div>
+    </div>
+    <div class="topic-grid">
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">2.1</span>
+          <span class="topic-name">Introduction to Random Variables</span>
+          <span class="bloom-tag bloom-understand">UNDERSTAND</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · MATCH OUTCOMES AS RANDOM VARIABLES</div>
+          <p>A <strong>random variable (RV)</strong> maps outcomes of a random experiment to numbers. Every quantity computed by the predictor is a realisation of an RV.</p>
+          <p><strong>Discrete RVs in our model:</strong> X = runs off a single delivery {0,1,2,3,4,6}; Y = wickets in an innings {0…10}; W = match winner {0,1}.</p>
+          <p><strong>Continuous RVs:</strong> λ = team run-rate (ℝ⁺); θ = win probability ∈ [0,1] modelled by the Beta distribution; venue win rate ∈ [0,1].</p>
+          <p>The distinction matters: discrete RVs use PMFs; continuous RVs use PDFs — both are core to the models on this page.</p>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">2.2</span>
+          <span class="topic-name">Probability Mass &amp; Density Functions</span>
+          <span class="bloom-tag bloom-understand">UNDERSTAND</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · RUNS PER DELIVERY / WIN PROBABILITY</div>
+          <p>The <strong>PMF</strong> of runs per over gives P(X=k). From deliveries.csv we compute the empirical PMF for each team. The <strong>PDF</strong> of the Beta distribution gives the density of win probability θ.</p>
+          <div class="formula-box">
+<span class="comment">// Poisson PMF (runs per over):</span>
+P(X <span class="op">=</span> k) = e<span class="op">^</span>-λ × λ<span class="op">^</span>k / k!
+
+<span class="comment">// Beta PDF (win probability θ):</span>
+f(θ) = θ<span class="op">^</span>(α-1) × (1-θ)<span class="op">^</span>(β-1) / B(α,β)
+
+<span class="comment">// Key properties:</span>
+<span class="comment">// PMF: Σ P(X=k) = 1  (sums to 1)</span>
+<span class="comment">// PDF: ∫ f(x)dx  = 1  (area under curve = 1)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">2.3</span>
+          <span class="topic-name">Distribution Functions (CDF)</span>
+          <span class="bloom-tag bloom-understand">UNDERSTAND</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · CREDIBLE INTERVALS ON DASHBOARD</div>
+          <p>The <strong>CDF F(x) = P(X ≤ x)</strong> gives cumulative probability. In the predictor, it answers: "What is P(CSK scores fewer than 160 runs)?" and generates the credible interval shown on the win probability bar.</p>
+          <div class="formula-box">
+<span class="comment">// Poisson CDF (score below target T):</span>
+P(X <span class="op">≤</span> T) = Σₖ₌₀ᵀ [e<span class="op">^</span>-λ × λ<span class="op">^</span>k / k!]
+<span class="comment">// In R: ppois(T, lambda)</span>
+
+<span class="comment">// 95% Credible Interval from Beta CDF inverse:</span>
+CI_low  = qbeta(0.025, α, β)
+CI_high = qbeta(0.975, α, β)
+<span class="comment">// This is the interval displayed on the dashboard</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">2.4</span>
+          <span class="topic-name">Joint Probability Mass &amp; Density Functions</span>
+          <span class="bloom-tag bloom-understand">UNDERSTAND</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · JOINT RUNS &amp; WICKETS</div>
+          <p>A <strong>joint distribution</strong> describes two or more RVs together. Runs scored (X) and wickets lost (Y) are not independent — losing wickets restricts run-scoring in death overs.</p>
+          <div class="formula-box">
+<span class="comment">// Joint PMF (discrete):</span>
+P(X=x, Y=y) = P(runs=x AND wickets=y in innings)
+
+<span class="comment">// Marginalisation to get runs distribution:</span>
+P(X=x) = Σᵧ P(X=x, Y=y)
+
+<span class="comment">// Joint PDF (continuous: run-rate λ, venue factor v):</span>
+f(λ, v) — estimated from joint innings+venue data
+<span class="comment">// The 3-model ensemble approximates this joint PDF</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">2.5</span>
+          <span class="topic-name">Joint Distribution Functions</span>
+          <span class="bloom-tag bloom-understand">UNDERSTAND</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · P(TEAM1 SCORE &gt; TEAM2 SCORE)</div>
+          <p>The <strong>joint CDF</strong> F(x,y) = P(X ≤ x, Y ≤ y) extends single-variable CDFs to multiple dimensions. It models the probability that both teams' scores fall below certain thresholds — the foundation for score-based win probability.</p>
+          <div class="formula-box">
+<span class="comment">// Joint CDF (discrete):</span>
+F(x,y) = P(X ≤ x, Y ≤ y) = Σᵢ≤ₓ Σⱼ≤ᵧ P(X=i, Y=j)
+
+<span class="comment">// Properties:</span>
+<span class="comment">// F(∞,∞) = 1</span>
+<span class="comment">// F(x,∞) = F_X(x)  [marginal CDF of X]</span>
+<span class="comment">// F(-∞,y) = 0</span>
+
+<span class="comment">// Win via scores:</span>
+<span class="comment">// P(Team1 wins) = P(Score1 > Score2)</span>
+<span class="comment">// = Σₓ P(Score1=x) × P(Score2 < x)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">2.6</span>
+          <span class="topic-name">Marginal Probability Distributions</span>
+          <span class="bloom-tag bloom-apply">APPLY</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · ISOLATING SINGLE-TEAM STATS</div>
+          <p>Given a joint distribution of (Team1 score, Team2 score), the <strong>marginal distribution</strong> of Team1's score is obtained by summing out Team2's scores — letting us study each team independently.</p>
+          <div class="formula-box">
+<span class="comment">// Marginal PMF (discrete):</span>
+P(X=x) = Σᵧ P(X=x, Y=y)
+
+<span class="comment">// Marginal PDF (continuous):</span>
+f_X(x) = ∫ f(x,y) dy
+
+<span class="comment">// Applied: venue-specific marginal run rate</span>
+f(λ_team1 | venue) = ∫ f(λ_team1, v_factor) dv
+<span class="comment">// Gives team1 run-rate distribution marginalised over venue</span>
+          </div>
+          <p>The venue factor is derived from the marginal win rate of each team at each ground — computed by summing over all opponent strengths.</p>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">2.7</span>
+          <span class="topic-name">Conditional Probability Distributions</span>
+          <span class="bloom-tag bloom-apply">APPLY</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · WIN RATE GIVEN VENUE</div>
+          <p><strong>Conditional distributions</strong> P(X | Y=y) describe one variable's distribution given a specific value of another. This directly powers the venue factor and the Bayesian posterior.</p>
+          <div class="formula-box">
+<span class="comment">// Conditional PMF:</span>
+P(X=x | Y=y) = P(X=x, Y=y) / P(Y=y)
+
+<span class="comment">// Applied: P(CSK wins | venue = Chepauk)</span>
+<span class="comment">// = CSK wins at Chepauk / total matches at Chepauk</span>
+
+<span class="comment">// Bayesian update is a conditional distribution:</span>
+P(θ | data) ∝ P(data | θ) × P(θ)
+<span class="comment">// Posterior win prob = P(θ | match outcomes observed)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">2.8</span>
+          <span class="topic-name">Mathematical Expectation &amp; Covariance</span>
+          <span class="bloom-tag bloom-apply">APPLY</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · EXPECTED SCORES &amp; MODEL CORRELATION</div>
+          <p><strong>E[X]</strong> is the long-run average shown on the Expected Score cards. <strong>Covariance</strong> measures how two sub-models move together, which determines whether the ensemble variance is lower than each individual model.</p>
+          <div class="formula-box">
+<span class="comment">// Expected score (Poisson):</span>
+E[X] = λ × 20   <span class="comment">// runs over 20 overs</span>
+
+<span class="comment">// Variance (Poisson: E = Var):</span>
+Var[X] = λ × 20
+
+<span class="comment">// Ensemble variance with covariance:</span>
+Var(w₁P₁ + w₂P₂ + w₃P₃) =
+  Σ wᵢ²Var(Pᵢ) + 2Σᵢ&lt;ⱼ wᵢwⱼCov(Pᵢ,Pⱼ)
+<span class="comment">// Negative covariance → ensemble more stable than any single model</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">2.9</span>
+          <span class="topic-name">Moment Generating Function</span>
+          <span class="bloom-tag bloom-apply">APPLY</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · DERIVING POISSON PROPERTIES</div>
+          <p>The <strong>MGF M_X(t) = E[e^(tX)]</strong> uniquely characterises a distribution and generates all moments by differentiation. The Poisson MGF validates the key property E[X] = Var[X] = λ that we rely on.</p>
+          <div class="formula-box">
+<span class="comment">// Poisson MGF:</span>
+M_X(t) = exp(λ(eᵗ - 1))
+
+<span class="comment">// 1st moment (mean):</span>
+E[X] = M'(0) = λ   ✓
+
+<span class="comment">// 2nd moment → Variance:</span>
+E[X²] = M''(0) = λ² + λ   →  Var[X] = λ   ✓
+
+<span class="comment">// We verify E=Var empirically from deliveries.csv</span>
+<span class="comment">// before applying Poisson model</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ═══ MODULE 3 ═══ -->
+  <section class="module-section" id="mod3">
+    <div class="module-header green">
+      <div class="module-num">03</div>
+      <div class="module-icon">📉</div>
+      <div>
+        <div class="module-title">Correlation and Regression</div>
+        <div class="module-co">CO: 3 · Relationship Modelling &amp; Prediction</div>
+      </div>
+    </div>
+    <div class="topic-grid">
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">3.1</span>
+          <span class="topic-name">Introduction to Correlation</span>
+          <span class="bloom-tag bloom-understand">UNDERSTAND</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · BATTING AVG VS WIN RATE</div>
+          <p>Correlation measures the linear association between two variables. Key questions: <strong>Does a team's batting average correlate with its win rate?</strong> Does powerplay run-rate predict final score?</p>
+          <div class="formula-box">
+<span class="comment">// Pearson correlation coefficient:</span>
+<span class="var">r</span> = Σ[(xᵢ-x̄)(yᵢ-ȳ)] / √[Σ(xᵢ-x̄)² × Σ(yᵢ-ȳ)²]
+<span class="comment">// r ∈ [-1, 1]</span>
+
+<span class="comment">// Interpretations for IPL data:</span>
+<span class="comment">// r(batting_avg, win_rate)  ≈ +0.72 → strong positive</span>
+<span class="comment">// r(bowling_econ, win_rate) ≈ -0.68 → strong negative</span>
+<span class="comment">// Strong correlations justify including a feature in the model</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">3.2</span>
+          <span class="topic-name">Correlation and Rank Correlation</span>
+          <span class="bloom-tag bloom-apply">APPLY</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · VALIDATING PLAYER IMPACT SCORE RANKINGS</div>
+          <p><strong>Spearman's rank correlation</strong> is used when data is non-normal or ordinal. We use it to verify that our computed impact score ranks players consistently with batting average rankings.</p>
+          <div class="formula-box">
+<span class="comment">// Spearman's ρ:</span>
+<span class="var">ρ</span> = 1 - [6 × Σdᵢ²] / [n(n²-1)]
+<span class="comment">// dᵢ = difference in ranks of player i</span>
+<span class="comment">// ρ ≈ 0.85 → impact score ranks well-correlated with batting avg</span>
+
+<span class="comment">// Kendall's τ (alternative):</span>
+<span class="var">τ</span> = (Concordant - Discordant) / [n(n-1)/2]
+          </div>
+          <p>High rank correlation between our impact score and expert cricket ratings validates that the composite formula is a good proxy for true player quality without needing labelled training data.</p>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">3.3</span>
+          <span class="topic-name">Regression</span>
+          <span class="bloom-tag bloom-apply">APPLY</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · PREDICTING SCORE FROM POWERPLAY</div>
+          <p><strong>Simple linear regression</strong> models final innings score as a linear function of powerplay run-rate (first 6 overs), providing a complementary score predictor to the Poisson model.</p>
+          <div class="formula-box">
+<span class="comment">// Regression model:</span>
+ŷ = <span class="var">β₀</span> + <span class="var">β₁</span>x
+<span class="comment">// y = final score, x = powerplay run-rate</span>
+
+<span class="comment">// OLS estimators (minimise sum of squared residuals):</span>
+<span class="var">β₁</span> = Σ(xᵢ-x̄)(yᵢ-ȳ) / Σ(xᵢ-x̄)²
+<span class="var">β₀</span> = ȳ - β₁x̄
+
+<span class="comment">// R² (proportion of variance explained):</span>
+<span class="var">R²</span> = 1 - (SS_residual / SS_total)
+<span class="comment">// R² ≈ 0.65 → powerplay explains 65% of final score variance</span>
+          </div>
+          <div class="r-snippet">
+<span class="comment"># R implementation</span>
+model <span class="keyword">&lt;-</span> <span class="fn">lm</span>(final_score ~ powerplay_rr, data=innings_data)
+<span class="fn">summary</span>(model)
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">3.4</span>
+          <span class="topic-name">Partial &amp; Multiple Correlation</span>
+          <span class="bloom-tag bloom-apply">APPLY</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · ISOLATING VENUE EFFECT</div>
+          <p><strong>Partial correlation</strong> measures the relationship between win probability and venue after controlling for team strength — isolating the true venue effect free of confounding.</p>
+          <div class="formula-box">
+<span class="comment">// Partial correlation r(X,Y | Z):</span>
+r_XY.Z = (r_XY - r_XZ × r_YZ) / √[(1-r_XZ²)(1-r_YZ²)]
+
+<span class="comment">// r(win_prob, venue | team_strength)</span>
+<span class="comment">// Controls for opponent quality before measuring venue effect</span>
+
+<span class="comment">// Multiple R (3-model ensemble):</span>
+R² = Var(ensemble prediction) / Var(actual outcomes)
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">3.5</span>
+          <span class="topic-name">Multiple Regression</span>
+          <span class="bloom-tag bloom-apply">APPLY</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · DATA-DRIVEN ENSEMBLE WEIGHTS</div>
+          <p><strong>Multiple regression</strong> extends the ensemble to learn optimal weights from data instead of the hardcoded 40/35/25 split. This would make our model statistically optimal rather than heuristic.</p>
+          <div class="formula-box">
+<span class="comment">// Multiple regression model:</span>
+P(win) = <span class="var">β₀</span> + <span class="var">β₁</span>×P_bayesian + <span class="var">β₂</span>×P_poisson + <span class="var">β₃</span>×P_venue + ε
+
+<span class="comment">// OLS matrix form:</span>
+<span class="var">β̂</span> = (XᵀX)⁻¹ Xᵀy
+
+<span class="comment">// Adjusted R² (penalises extra predictors):</span>
+<span class="var">R̄²</span> = 1 - [(1-R²)(n-1)/(n-k-1)]
+          </div>
+          <p>A future version of the predictor would replace the hardcoded ensemble weights with OLS-estimated β coefficients, making the model fully data-driven and extensible to new predictors.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ═══ MODULE 4 ═══ -->
+  <section class="module-section" id="mod4">
+    <div class="module-header red">
+      <div class="module-num">04</div>
+      <div class="module-icon">📐</div>
+      <div>
+        <div class="module-title">Probability Distributions</div>
+        <div class="module-co">CO: 2 · Classical Distributions Applied to Cricket Data</div>
+      </div>
+    </div>
+    <div class="topic-grid">
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">4.1</span>
+          <span class="topic-name">Probability Distributions — An Introduction</span>
+          <span class="bloom-tag bloom-understand">UNDERSTAND</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · CHOOSING THE RIGHT DISTRIBUTION</div>
+          <p>The predictor uses four different distributions, each chosen because its mathematical properties match the physical process being modelled. Distribution selection is the most critical modelling decision.</p>
+          <ul class="assumption-list">
+            <li>Binomial → match outcomes (n independent win/loss trials)</li>
+            <li>Poisson → runs per over (discrete events at constant rate)</li>
+            <li>Beta → win probability θ (continuous, bounded [0,1])</li>
+            <li>Normal → large-sample approximations via CLT</li>
+            <li>Exponential / Gamma → time between wickets falling</li>
+            <li>Weibull → non-constant hazard rate across overs</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">4.2</span>
+          <span class="topic-name">Binomial Distribution</span>
+          <span class="bloom-tag bloom-apply">APPLY</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · H2H WIN RECORDS &amp; MATCHUP TEST</div>
+          <p>The <strong>Binomial(n,p)</strong> distribution models the number of wins in n matches with fixed win probability p. It is the likelihood model in Bayesian updating and the basis of the matchup significance test.</p>
+          <div class="formula-box">
+<span class="comment">// PMF:</span>
+P(X=k) = C(n,k) × pᵏ × (1-p)^(n-k)
+
+<span class="comment">// Mean: E[X] = np</span>
+<span class="comment">// Variance: Var[X] = np(1-p)</span>
+
+<span class="comment">// Matchup test (e.g. Bumrah vs Kohli):</span>
+<span class="comment">// H₀: p = 0.12 (overall wicket rate)</span>
+P(X ≥ 3 | n=8, p=0.12) = 1 - pbinom(2, 8, 0.12)
+<span class="comment">// p-value < 0.05 → Bumrah dominates this matchup ★</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">4.3</span>
+          <span class="topic-name">Poisson Distribution</span>
+          <span class="bloom-tag bloom-apply">APPLY</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · CORE RUN-RATE MODEL</div>
+          <p>The <strong>Poisson(λ)</strong> distribution is the core of the Expected Score model. Runs in an over are discrete events arriving at a constant average rate — the classic Poisson setting.</p>
+          <div class="formula-box">
+<span class="comment">// PMF:</span>
+P(X=k) = e<span class="op">^</span>-λ × λ<span class="op">^</span>k / k!
+
+<span class="comment">// Key: E[X] = Var[X] = λ</span>
+
+<span class="comment">// MLE of λ (Maximum Likelihood Estimate):</span>
+<span class="var">λ̂</span> = x̄ = mean runs per over from innings data
+
+<span class="comment">// Expected T20 score:</span>
+E[Score] = λ̂ × 20
+
+<span class="comment">// Win probability from run-rates:</span>
+P(A wins) ≈ λ_A / (λ_A + λ_B)
+          </div>
+          <div class="r-snippet">
+<span class="comment"># MLE and expected score</span>
+lambda <span class="keyword">&lt;-</span> <span class="fn">mean</span>(team_innings$runs_per_over)
+expected_score <span class="keyword">&lt;-</span> lambda <span class="keyword">*</span> <span class="num">20</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">4.4</span>
+          <span class="topic-name">Normal Distribution</span>
+          <span class="bloom-tag bloom-apply">APPLY</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · CLT &amp; LARGE-SAMPLE INFERENCE</div>
+          <p>By the <strong>Central Limit Theorem</strong>, the sample mean run-rate x̄ is approximately Normal for large n. This underpins the standard error calculations used to build model confidence intervals.</p>
+          <div class="formula-box">
+<span class="comment">// Normal approx to Binomial (n large):</span>
+X ~ Bin(n,p) ≈ Normal(μ=np, σ²=np(1-p))
+
+<span class="comment">// 95% CI for win probability p̂ (Wald interval):</span>
+p̂ ± 1.96 × √[p̂(1-p̂)/n]
+
+<span class="comment">// Bayesian CI using Normal approx of Beta posterior:</span>
+CI ≈ p̂ ± 1.96 × SE
+SE = √[αβ / ((α+β)²(α+β+1))]
+<span class="comment">// Displayed as the credible interval on the dashboard</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">4.5</span>
+          <span class="topic-name">Exponential Distribution</span>
+          <span class="bloom-tag bloom-apply">APPLY</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · BALLS BETWEEN WICKETS</div>
+          <p>The <strong>Exponential(μ)</strong> distribution models waiting time between events in a Poisson process. In cricket: the number of balls between consecutive wickets follows an exponential distribution.</p>
+          <div class="formula-box">
+<span class="comment">// PDF: f(x) = μ × e^(-μx),  x ≥ 0</span>
+<span class="comment">// Mean time between wickets: E[X] = 1/μ</span>
+
+<span class="comment">// P(next wicket within 6 balls):</span>
+P(X <span class="op">≤</span> 6) = 1 - e<span class="op">^</span>(-μ×6)
+
+<span class="comment">// Memoryless property:</span>
+<span class="comment">// P(wicket next ball | survived k balls) = P(wicket next ball)</span>
+<span class="comment">// Justifies treating each delivery as an independent trial</span>
+<span class="comment">// in the Binomial matchup test</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">4.6</span>
+          <span class="topic-name">Gamma Distribution</span>
+          <span class="bloom-tag bloom-apply">APPLY</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · BALLS UNTIL k WICKETS FALL</div>
+          <p>The <strong>Gamma(k,μ)</strong> distribution models time until the k-th event in a Poisson process — i.e., balls until a team loses k wickets. It is also the conjugate prior for the Poisson rate λ.</p>
+          <div class="formula-box">
+<span class="comment">// PDF: f(x) = [μᵏ x^(k-1) e^(-μx)] / Γ(k)</span>
+<span class="comment">// Mean: E[X] = k/μ</span>
+<span class="comment">// Variance: Var[X] = k/μ²</span>
+
+<span class="comment">// Applied: balls until 5 wickets fall</span>
+<span class="comment">// Gamma(k=5, μ=team's wicket rate per ball)</span>
+<span class="comment">// E[X] = 5/μ</span>
+
+<span class="comment">// Also: Gamma-Poisson model (alternative to Beta-Binomial)</span>
+<span class="comment">// λ ~ Gamma(α,β) → robust run-rate prior</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">4.7</span>
+          <span class="topic-name">Weibull Distribution</span>
+          <span class="bloom-tag bloom-apply">APPLY</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · NON-CONSTANT HAZARD BY OVER</div>
+          <p>The <strong>Weibull(k,λ)</strong> generalises Exponential by allowing the hazard rate to change over time. Wicket-taking rates differ between powerplay, middle overs, and death overs — a non-constant hazard structure.</p>
+          <div class="formula-box">
+<span class="comment">// PDF: f(x) = (k/λ)(x/λ)^(k-1) e^(-(x/λ)^k)</span>
+
+<span class="comment">// Shape parameter k determines hazard behaviour:</span>
+<span class="comment">// k < 1 → decreasing hazard (batsmen settle in, early overs)</span>
+<span class="comment">// k = 1 → constant hazard (Exponential, middle overs)</span>
+<span class="comment">// k > 1 → increasing hazard (tail-enders, death-over risks)</span>
+
+<span class="comment">// Hazard function:</span>
+h(x) = (k/λ) × (x/λ)^(k-1)
+<span class="comment">// Directly connects to Module 7 (Reliability)</span>
+          </div>
+          <p>The Weibull model bridges Modules 4 and 7: wicket-fall timing in cricket follows exactly the same mathematical framework as component failure in reliability engineering, with cricket overs as the "time" axis.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ═══ MODULE 5 ═══ -->
+  <section class="module-section" id="mod5">
+    <div class="module-header purple">
+      <div class="module-num">05</div>
+      <div class="module-icon">🧪</div>
+      <div>
+        <div class="module-title">Hypothesis Testing – I</div>
+        <div class="module-co">CO: 4 · Large Sample Tests · Z-Tests for Proportions and Means</div>
+      </div>
+    </div>
+    <div class="topic-grid">
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">5.1</span>
+          <span class="topic-name">Hypothesis Testing — An Introduction</span>
+          <span class="bloom-tag bloom-understand">UNDERSTAND</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · FORMAL STATISTICAL CLAIMS</div>
+          <p>Every statistical statement in the predictor can be framed as a hypothesis test. The matchup table's ★ symbol literally represents a rejected null hypothesis at α = 0.05.</p>
+          <div class="formula-box">
+<span class="comment">// Framework:</span>
+H₀ (Null):        "Pattern is due to chance"
+H₁ (Alternative): "Pattern is statistically real"
+
+<span class="comment">// Decision rule:</span>
+p-value = P(result this extreme | H₀ true)
+<span class="comment">// Reject H₀ if p-value < α = 0.05  → flag ★ in matchup table</span>
+
+<span class="comment">// Error types:</span>
+<span class="comment">// Type I  (α): False positive — flag a neutral matchup as dominant</span>
+<span class="comment">// Type II (β): False negative — miss a real dominance pattern</span>
+<span class="comment">// Power = 1 - β (probability of detecting a real effect)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">5.2</span>
+          <span class="topic-name">Types of Errors, Critical Region &amp; Large Sample Tests</span>
+          <span class="bloom-tag bloom-understand">UNDERSTAND</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · MATCHUP DOMINANCE THRESHOLD</div>
+          <p>We must balance Type I (false positive matchup flags) and Type II (missed real dominance) errors. The critical region defines the boundary where we call a matchup "dominant."</p>
+          <div class="formula-box">
+<span class="comment">// Critical region (one-sided binomial, exact):</span>
+Reject H₀ if X ≥ c  where P(X ≥ c | H₀) ≤ 0.05
+
+<span class="comment">// Large sample (Z-test) approximation when n > 30:</span>
+<span class="var">Z</span> = (X - n×p₀) / √(n×p₀×(1-p₀))
+<span class="comment">// One-sided: Reject if Z > 1.645  (α = 0.05)</span>
+<span class="comment">// Two-sided: Reject if |Z| > 1.96 (α = 0.05)</span>
+
+<span class="comment">// Predictor uses one-sided test (directional hypothesis)</span>
+<span class="comment">// → more power to detect real effects</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">5.3</span>
+          <span class="topic-name">Z-Test for Single &amp; Difference of Proportions</span>
+          <span class="bloom-tag bloom-apply">APPLY</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · IS A TEAM'S WIN RATE ABOVE CHANCE?</div>
+          <p>Z-tests for proportions formally test whether a team's observed win rate is significantly above 50%, and whether two teams have significantly different win rates at a specific venue.</p>
+          <div class="formula-box">
+<span class="comment">// Single proportion (Is CSK win rate > 0.5?):</span>
+<span class="var">Z</span> = (p̂ - p₀) / √(p₀(1-p₀)/n)
+<span class="comment">// p̂ = observed rate, p₀ = 0.5, n = matches played</span>
+
+<span class="comment">// Two-proportion test (CSK vs MI win rate at Wankhede):</span>
+<span class="var">p̄</span> = (x₁+x₂) / (n₁+n₂)   <span class="comment">// pooled proportion</span>
+<span class="var">Z</span> = (p̂₁ - p̂₂) / √[p̄(1-p̄)(1/n₁ + 1/n₂)]
+          </div>
+          <div class="r-snippet">
+<span class="fn">prop.test</span>(x=csk_wins, n=total_matches, p=<span class="num">0.5</span>, alternative=<span class="num">"greater"</span>)
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">5.4</span>
+          <span class="topic-name">Z-Test for Single Mean &amp; Difference of Means</span>
+          <span class="bloom-tag bloom-apply">APPLY</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · ARE TWO TEAMS' RUN-RATES DIFFERENT?</div>
+          <p>We test whether two teams have significantly different mean run-rates — statistically justifying why the Poisson model assigns them different λ values rather than a shared parameter.</p>
+          <div class="formula-box">
+<span class="comment">// Single mean (Is CSK λ > 8.0 runs/over?):</span>
+<span class="var">Z</span> = (x̄ - μ₀) / (σ/√n)
+
+<span class="comment">// Difference of means (CSK λ vs MI λ):</span>
+<span class="var">Z</span> = (x̄₁ - x̄₂) / √(σ₁²/n₁ + σ₂²/n₂)
+<span class="comment">// σ estimated by s when n is large (CLT applies)</span>
+
+<span class="comment">// Reject H₀: μ₁=μ₂ if |Z| > 1.96 (two-sided, α=0.05)</span>
+<span class="comment">// If rejected → different λ values are statistically justified</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ═══ MODULE 6 ═══ -->
+  <section class="module-section" id="mod6">
+    <div class="module-header orange">
+      <div class="module-num">06</div>
+      <div class="module-icon">🔬</div>
+      <div>
+        <div class="module-title">Hypothesis Testing – II</div>
+        <div class="module-co">CO: 4 · Small Sample Tests · ANOVA · Design of Experiments</div>
+      </div>
+    </div>
+    <div class="topic-grid">
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">6.1</span>
+          <span class="topic-name">Hypothesis Testing II — An Introduction</span>
+          <span class="bloom-tag bloom-understand">UNDERSTAND</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · SMALL SAMPLE SITUATIONS IN CRICKET</div>
+          <p>When n &lt; 30, or when σ² is unknown, Z-tests are unreliable. Player matchup data often has very few observations — e.g., Bumrah has bowled only 8 overs to Kohli. <strong>Module 6 covers exact and small-sample methods</strong> appropriate for this regime.</p>
+          <p>This is precisely why the predictor uses the <strong>exact Binomial test</strong> (not the Z approximation) for player matchup significance — the sample sizes are too small for the normal approximation to be valid.</p>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">6.2</span>
+          <span class="topic-name">Small Sample Tests — Student's t-Test</span>
+          <span class="bloom-tag bloom-apply">APPLY</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · NEW PLAYERS WITH LIMITED IPL DATA</div>
+          <p>When a new player has only 12 IPL innings, the <strong>t-test</strong> gives valid inference without knowing σ. We test whether the debutant's run-rate is significantly above the league average.</p>
+          <div class="formula-box">
+<span class="comment">// One-sample t-test (n small, σ unknown):</span>
+<span class="var">t</span> = (x̄ - μ₀) / (s/√n)   ~  t_{n-1}
+
+<span class="comment">// t has heavier tails than Z → wider CIs → more conservative</span>
+<span class="comment">// As n→∞, t_{n-1} → Normal(0,1)</span>
+
+<span class="comment">// Two-sample t-test (compare two players' run-rates):</span>
+<span class="var">t</span> = (x̄₁ - x̄₂) / (s_p × √(1/n₁ + 1/n₂))
+<span class="comment">// s_p = pooled SD, df = n₁+n₂-2</span>
+          </div>
+          <div class="r-snippet">
+<span class="fn">t.test</span>(player_runrates, mu=<span class="num">7.5</span>, alternative=<span class="num">"greater"</span>)
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">6.3</span>
+          <span class="topic-name">F-Test</span>
+          <span class="bloom-tag bloom-apply">APPLY</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · DO VENUES HAVE EQUAL SCORE VARIABILITY?</div>
+          <p>The <strong>F-test</strong> compares variances of two populations. High variance differences between venues violate the equal-variance assumption needed for pooled t-tests and some ANOVA formulations.</p>
+          <div class="formula-box">
+<span class="comment">// F-test statistic:</span>
+<span class="var">F</span> = s₁² / s₂²   ~  F_{n₁-1, n₂-1}
+<span class="comment">// H₀: σ₁² = σ₂² (Wankhede and Chepauk equally variable)</span>
+<span class="comment">// Reject if F > F_critical or F < 1/F_critical</span>
+
+<span class="comment">// F also appears in regression overall significance:</span>
+<span class="comment">// F = MS_regression / MS_residual</span>
+<span class="comment">// Tests: are any predictors (P_bayesian, P_poisson, P_venue)</span>
+<span class="comment">// significantly associated with match outcomes?</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">6.4</span>
+          <span class="topic-name">Chi-Square Test — Goodness of Fit</span>
+          <span class="bloom-tag bloom-apply">APPLY</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · VALIDATING THE POISSON ASSUMPTION</div>
+          <p>Before applying the Poisson model, we must verify that runs-per-over actually follow a Poisson distribution. The <strong>χ² goodness-of-fit test</strong> is the formal check.</p>
+          <div class="formula-box">
+<span class="comment">// Chi-Square statistic:</span>
+<span class="var">χ²</span> = Σ [(Oᵢ - Eᵢ)² / Eᵢ]   ~  χ²_{k-1-p}
+<span class="comment">// Oᵢ = observed count in bin i</span>
+<span class="comment">// Eᵢ = expected count under Poisson(λ̂)</span>
+<span class="comment">// p = 1 (one estimated parameter: λ)</span>
+<span class="comment">// H₀: data follows Poisson → Reject if χ² > χ²_critical</span>
+          </div>
+          <div class="r-snippet">
+<span class="comment"># Goodness-of-fit test in R</span>
+obs <span class="keyword">&lt;-</span> <span class="fn">table</span>(runs_per_over)
+exp <span class="keyword">&lt;-</span> <span class="fn">dpois</span>(<span class="num">0</span>:<span class="num">20</span>, lambda=lambda_hat) <span class="keyword">*</span> n
+<span class="fn">chisq.test</span>(obs, p=exp<span class="keyword">/</span><span class="fn">sum</span>(exp))
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">6.5</span>
+          <span class="topic-name">Chi-Square Test — Independence of Attributes</span>
+          <span class="bloom-tag bloom-apply">APPLY</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · IS TOSS RESULT INDEPENDENT OF MATCH OUTCOME?</div>
+          <p>Is winning the toss associated with winning the match? The χ² independence test on a 2×2 table answers this — and the typical result (p &gt; 0.05) justifies why toss is excluded from our model.</p>
+          <div class="formula-box">
+<span class="comment">// 2×2 Contingency Table:</span>
+<span class="comment">//                 Win Match   Lose Match</span>
+<span class="comment">// Win Toss:          a            b</span>
+<span class="comment">// Lose Toss:         c            d</span>
+
+<span class="comment">// Expected cell frequency:</span>
+Eᵢⱼ = (row total × col total) / grand total
+
+<span class="comment">// Test statistic:</span>
+<span class="var">χ²</span> = Σ [(Oᵢⱼ - Eᵢⱼ)² / Eᵢⱼ]   ~  χ²_{(r-1)(c-1)}
+<span class="comment">// p > 0.05 → toss and match result are independent</span>
+<span class="comment">// → toss not included in ensemble (justified!)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">6.6</span>
+          <span class="topic-name">Design of Experiments — CRD, RBD and LSD</span>
+          <span class="bloom-tag bloom-apply">APPLY</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · CONTROLLING CONFOUNDERS IN MATCH DATA</div>
+          <p>IPL match data is observational. DOE concepts help identify and control sources of variation — venues and seasons are confounders that bias naïve comparisons of team strength.</p>
+          <ul class="assumption-list">
+            <li>CRD: Compare team run-rates ignoring venues — valid only if venues are randomly assigned (not the case)</li>
+            <li>RBD: Block by venue — venues as blocks controlling for pitch conditions. Gives fairer team comparisons</li>
+            <li>LSD: Control for both venue and season simultaneously — each team plays each venue each season (approximately true in IPL)</li>
+          </ul>
+          <p><strong>Key insight:</strong> Naively comparing two teams' win rates ignores venue confounding. RBD-style analysis — blocking on venue — powers the venue-adjusted win probabilities in our model.</p>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">6.7–6.9</span>
+          <span class="topic-name">Analysis of Variance (One, Two &amp; Three Way)</span>
+          <span class="bloom-tag bloom-analyze">ANALYZE</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · DO VENUES / SEASONS SIGNIFICANTLY AFFECT SCORES?</div>
+          <p><strong>One-Way ANOVA:</strong> Tests if mean scores differ across the 10 IPL venues. <strong>Two-Way ANOVA:</strong> Simultaneously tests venue and season effects. <strong>Three-Way ANOVA:</strong> Adds team as a third factor.</p>
+          <div class="formula-box">
+<span class="comment">// ANOVA decomposition:</span>
+SS_total = SS_between + SS_within
+
+<span class="comment">// F-ratio (One-Way, k groups):</span>
+<span class="var">F</span> = [SS_between/(k-1)] / [SS_within/(N-k)]
+<span class="comment">// H₀: all 10 venue mean scores are equal</span>
+<span class="comment">// Large F → venues significantly differ → venue factor justified</span>
+
+<span class="comment">// Two-Way:</span>
+<span class="comment">// SS_total = SS_venue + SS_season + SS_interaction + SS_error</span>
+          </div>
+          <div class="r-snippet">
+model <span class="keyword">&lt;-</span> <span class="fn">aov</span>(score ~ venue, data=matches_df)
+<span class="fn">summary</span>(model)    <span class="comment"># F-statistic, p-value</span>
+<span class="fn">TukeyHSD</span>(model)  <span class="comment"># Which venue pairs differ?</span>
+          </div>
+          <p>If ANOVA rejects H₀ (p &lt; 0.05), it statistically justifies the venue factor weight (25%) in the ensemble. The Tukey post-hoc test identifies which specific venues are outliers — informing the venue adjustment parameters.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ═══ MODULE 7 ═══ -->
+  <section class="module-section" id="mod7">
+    <div class="module-header">
+      <div class="module-num">07</div>
+      <div class="module-icon">⚙️</div>
+      <div>
+        <div class="module-title">Reliability</div>
+        <div class="module-co">CO: 5 · System Reliability, Maintainability &amp; Availability</div>
+      </div>
+    </div>
+    <div class="topic-grid">
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">7.1</span>
+          <span class="topic-name">Reliability — Introduction and Motivation</span>
+          <span class="bloom-tag bloom-remember">REMEMBER</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · TEAM &amp; PLAYER CONSISTENCY</div>
+          <p><strong>Reliability R(t)</strong> is the probability that a system performs its intended function for a specified period under stated conditions. In cricket: a team's reliability is how consistently it performs to its benchmark — not just its average.</p>
+          <p>A team with R = 0.80 has an 80% probability of performing to its benchmark standard in any given match. High-reliability teams have low variance and high mean run-rates — our model has tighter confidence intervals for them.</p>
+          <p><strong>Why reliability matters for prediction:</strong> Standard statistics (means, win rates) are time-independent. Reliability adds the temporal dimension — critical for understanding form, fatigue, and squad depth across a tournament.</p>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">7.2</span>
+          <span class="topic-name">Basic Concepts — Hazard Function</span>
+          <span class="bloom-tag bloom-understand">UNDERSTAND</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · WICKET HAZARD RATE BY OVER</div>
+          <p>The <strong>hazard function h(t)</strong> gives the instantaneous rate of "failure" given survival to time t. In cricket: t = over number, failure = losing a wicket. The hazard rate is not constant — it follows a "bathtub" curve.</p>
+          <div class="formula-box">
+<span class="comment">// Hazard function:</span>
+h(t) = f(t) / R(t)
+<span class="comment">// f(t) = PDF of time-to-failure (time to next wicket)</span>
+<span class="comment">// R(t) = 1 - F(t) = survival function</span>
+
+<span class="comment">// Cricket "bathtub" curve:</span>
+<span class="comment">// Overs 1–6   (Powerplay): h(t) decreasing — batsmen cautious</span>
+<span class="comment">// Overs 7–15  (Middle):    h(t) constant — settled partnerships</span>
+<span class="comment">// Overs 16–20 (Death):     h(t) increasing — aggressive, risky shots</span>
+
+<span class="comment">// Cumulative hazard:</span>
+H(t) = -ln R(t) = ∫₀ᵗ h(u) du
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">7.3</span>
+          <span class="topic-name">Series &amp; Parallel Systems — System Reliability</span>
+          <span class="bloom-tag bloom-apply">APPLY</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · BATTING LINEUP &amp; BOWLING ATTACK MODELS</div>
+          <p>A cricket <strong>batting lineup is a series system</strong>: all key contributors must perform for the total to be competitive. The <strong>bowling attack is a parallel system</strong>: at least one bowler must perform well to restrict the opposition.</p>
+          <div class="formula-box">
+<span class="comment">// Series system (batting lineup, n key batsmen):</span>
+R_lineup = R₁ × R₂ × … × Rₙ
+<span class="comment">// Each batsman: Rᵢ = 0.70 → 6 batsmen:</span>
+<span class="comment">// R_lineup = 0.70⁶ ≈ 0.12 (chain breaks at weakest link)</span>
+
+<span class="comment">// Parallel system (bowling attack, m bowlers):</span>
+R_attack = 1 - (1-R₁)(1-R₂)…(1-Rₘ)
+<span class="comment">// Each bowler: Rᵢ = 0.60 → 4 bowlers:</span>
+<span class="comment">// R_attack = 1 - 0.40⁴ ≈ 0.97 (redundancy gives robustness)</span>
+          </div>
+          <p>This explains why balanced batting lineups (multiple reliable contributors) consistently outperform star-dependent teams — the series reliability product degrades rapidly without batting depth.</p>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">7.4</span>
+          <span class="topic-name">Maintainability — Preventive &amp; Repair Maintenance</span>
+          <span class="bloom-tag bloom-analyze">ANALYZE</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · RECOVERY AFTER WICKETS FALL</div>
+          <p><strong>Maintainability M(t)</strong> is the probability a failed system is restored within time t. In cricket: how quickly can a team recover after losing early wickets? The middle order acts as the "repair component."</p>
+          <div class="formula-box">
+<span class="comment">// Maintainability (Exponential repair times):</span>
+M(t) = 1 - e<span class="op">^</span>(-μt)
+<span class="comment">// μ = repair rate (scoring rate of middle order per over)</span>
+<span class="comment">// t = remaining overs available</span>
+
+<span class="comment">// Applied: P(team recovers from 50/3 to 150+ in 14 overs)</span>
+<span class="comment">// μ = middle-order run-rate after collapse</span>
+
+<span class="comment">// Preventive maintenance → player rotation policy:</span>
+<span class="comment">// Resting a key bowler (preventive) = avoid failure before it occurs</span>
+<span class="comment">// Bowling them to exhaustion (run to failure) = corrective maintenance</span>
+<span class="comment">// Optimal policy: maximise team availability over 14-match season</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-card">
+        <div class="topic-card-header">
+          <span class="topic-num">7.5</span>
+          <span class="topic-name">Availability</span>
+          <span class="bloom-tag bloom-analyze">ANALYZE</span>
+        </div>
+        <div class="topic-body">
+          <div class="ipl-tag">IPL APPLICATION · PLAYER AVAILABILITY &amp; SQUAD MANAGEMENT</div>
+          <p><strong>Availability A</strong> is the long-run proportion of time a system is operational. For players, it accounts for injuries, suspensions, and fatigue — the critical missing component from our current predictor.</p>
+          <div class="formula-box">
+<span class="comment">// Steady-state availability:</span>
+<span class="var">A</span> = MTTF / (MTTF + MTTR)
+<span class="comment">// MTTF = Mean Time To Failure (avg matches between injuries)</span>
+<span class="comment">// MTTR = Mean Time To Repair (avg matches to return)</span>
+
+<span class="comment">// Example: MTTF=10 matches, MTTR=3 matches</span>
+A = 10/(10+3) ≈ 0.77
+<span class="comment">// Player available for 77% of matches ≈ 11 of 14 IPL games</span>
+
+<span class="comment">// Team availability (series model):</span>
+A_team = Π Aᵢ   for i = 1 to 11
+<span class="comment">// Expected available squad strength per match</span>
+          </div>
+          <p>The predictor's listed limitation <em>"No player injury or availability information"</em> is precisely a missing <strong>availability model</strong>. Adding MTTF/MTTR from historical injury records would enable dynamic team strength that degrades during long tournaments — a direct and powerful application of Module 7 to cricket analytics.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ── Limitations ── -->
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-top:8px">
+    <div class="section-label">MODEL LIMITATIONS &amp; FUTURE IMPROVEMENTS</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:8px">
+      <div>
+        <div style="font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--red);margin-bottom:12px">⚠️ Current Limitations</div>
+        <ul class="assumption-list">
+          <li>Poisson model assumes stationarity (ignores recent form)</li>
+          <li>Bayesian model ignores pitch &amp; weather conditions</li>
+          <li>Binomial test assumes over independence (Module 2)</li>
+          <li>Ensemble weights are heuristic, not OLS-estimated (Module 3)</li>
+          <li>No player availability / injury model (Module 7)</li>
+          <li>Toss independence assumed but not formally tested (Module 6)</li>
+          <li>ANOVA venue significance not conducted on live data (Module 6)</li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--green);margin-bottom:12px">🚀 Potential Extensions</div>
+        <ul class="assumption-list">
+          <li>Multiple regression for optimal ensemble weights (Module 3)</li>
+          <li>Weibull hazard model for over-specific wicket rates (Module 4+7)</li>
+          <li>Two-Way ANOVA for venue × season interaction (Module 6)</li>
+          <li>Player MTTF/MTTR availability model (Module 7)</li>
+          <li>Series/parallel batting reliability scoring (Module 7)</li>
+          <li>Negative Binomial for overdispersed run counts (Module 4)</li>
+          <li>Bootstrap confidence intervals for impact scores (Module 2)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>Statistical Methods Reference · IPL Match Predictor · Probability &amp; Statistics Course · 2nd Year CS Undergraduate Project</p>
+  <p>Modules 1–7 · CO1–CO5 · Bloom's Taxonomy: Remember → Understand → Apply → Analyze</p>
+</footer>
+
+<script src="js/charts.js"></script>
+</body>
+</html>

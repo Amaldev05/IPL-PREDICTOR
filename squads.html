@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>IPL 2026 Squad Explorer | IPL Predictor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Barlow+Condensed:ital,wght@0,300;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/style.css"/>
+<style>
+/* ── Explorer-specific styles ── */
+.explorer-controls {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 28px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 16px;
+  align-items: end;
+}
+.ctrl-group { display: flex; flex-direction: column; gap: 6px; }
+.ctrl-label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+}
+.ctrl-input, .ctrl-select {
+  appearance: none;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 9px 12px;
+  border-radius: var(--radius);
+  width: 100%;
+  transition: border-color 0.2s;
+}
+.ctrl-input:focus, .ctrl-select:focus {
+  outline: none; border-color: var(--cyan);
+}
+.ctrl-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2300e5ff' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+.ctrl-select option { background: var(--bg2); }
+.reset-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  padding: 9px 16px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.2s, color 0.2s;
+  letter-spacing: 0.08em;
+}
+.reset-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+
+/* ── Stats summary bar ── */
+.stats-summary {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding: 14px 20px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.sum-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sum-val {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--gold);
+  line-height: 1;
+}
+.sum-lbl {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+}
+.sum-divider {
+  width: 1px;
+  background: var(--border);
+  align-self: stretch;
+}
+
+/* ── Player full table ── */
+.player-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+.player-table th {
+  background: var(--bg3);
+  color: var(--text-dim);
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.62rem;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: color 0.2s;
+}
+.player-table th:hover { color: var(--cyan); }
+.player-table th.sort-asc::after  { content: " ▲"; color: var(--cyan); }
+.player-table th.sort-desc::after { content: " ▼"; color: var(--cyan); }
+.player-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  white-space: nowrap;
+}
+.player-table tr:hover td { background: var(--bg2); }
+.player-table tr.captain-row td:first-child { border-left: 2px solid var(--gold); }
+
+.team-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.nat-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Team color map */
+.chip-CSK  { background:#ffd74022; color:#ffd740; border:1px solid #ffd74044; }
+.chip-MI   { background:#1e88e522; color:#64b5f6; border:1px solid #64b5f644; }
+.chip-RCB  { background:#ff000022; color:#ff6666; border:1px solid #ff666644; }
+.chip-KKR  { background:#aa44ff22; color:#cc88ff; border:1px solid #cc88ff44; }
+.chip-SRH  { background:#ff660022; color:#ff9944; border:1px solid #ff994444; }
+.chip-DC   { background:#0044ff22; color:#6688ff; border:1px solid #6688ff44; }
+.chip-RR   { background:#ff44aa22; color:#ff88cc; border:1px solid #ff88cc44; }
+.chip-LSG  { background:#44ffaa22; color:#88ffcc; border:1px solid #88ffcc44; }
+.chip-GT   { background:#00aaff22; color:#66ccff; border:1px solid #66ccff44; }
+.chip-PBKS { background:#dd000022; color:#ff7777; border:1px solid #ff777744; }
+
+/* ── Team overview grid ── */
+.team-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.team-overview-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.15s;
+}
+.team-overview-card:hover, .team-overview-card.active {
+  transform: translateY(-2px);
+}
+.team-overview-card.active { border-color: var(--cyan); }
+.tov-name {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+.tov-short {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  margin-bottom: 8px;
+}
+.tov-bars { display: flex; flex-direction: column; gap: 4px; }
+.tov-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  color: var(--text-muted);
+}
+.tov-bar-bg {
+  flex: 1;
+  background: var(--bg3);
+  height: 4px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.tov-bar-fill { height: 100%; border-radius: 2px; transition: width 0.8s ease; }
+.tov-captain {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  color: var(--gold);
+  margin-top: 8px;
+}
+
+/* ── Price chart ── */
+.price-chart-wrap {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 28px;
+}
+.price-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+.price-bar-row {
+  display: grid;
+  grid-template-columns: 180px 1fr 60px;
+  align-items: center;
+  gap: 10px;
+}
+.price-player-name {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.price-bar-bg {
+  background: var(--bg3);
+  border-radius: 2px;
+  height: 18px;
+  overflow: hidden;
+  position: relative;
+}
+.price-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 1s ease;
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+}
+.price-val {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--gold);
+  text-align: right;
+}
+
+/* ── View toggle ── */
+.view-toggle {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+.vt-btn {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  padding: 8px 16px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.1em;
+}
+.vt-btn:hover  { border-color: var(--cyan); color: var(--cyan); }
+.vt-btn.active { background: var(--cyan-dim); border-color: var(--cyan); color: var(--cyan); }
+
+/* ── Pagination ── */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+}
+.pg-btn {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.pg-btn:hover   { border-color: var(--cyan); color: var(--cyan); }
+.pg-btn.active  { background: var(--cyan-dim); border-color: var(--cyan); color: var(--cyan); }
+.pg-btn:disabled{ opacity: 0.3; cursor: not-allowed; }
+.pg-info { color: var(--text-muted); }
+
+@media (max-width: 900px) {
+  .explorer-controls { grid-template-columns: 1fr 1fr; }
+  .price-bar-row { grid-template-columns: 120px 1fr 50px; }
+}
+@media (max-width: 600px) {
+  .explorer-controls { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<!-- ── HEADER ── -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-icon">◈</span>
+      <div class="logo-text">
+        <span class="logo-main">IPL 2026 SQUAD EXPLORER</span>
+        <span class="logo-sub">242 Players · 10 Teams · Full Dataset</span>
+      </div>
+    </div>
+    <nav style="display:flex;gap:8px;">
+      <a href="index.html" class="vt-btn" style="text-decoration:none;display:flex;align-items:center">⚡ PREDICTOR</a>
+      <span class="vt-btn active" style="display:flex;align-items:center;cursor:default">👥 SQUADS</span>
+      <a href="venues.html" class="vt-btn" style="text-decoration:none;display:flex;align-items:center">🏟️ VENUES</a>
+      <a href="methods.html" class="vt-btn" style="text-decoration:none;display:flex;align-items:center">📐 METHODS</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- ═══ TEAM OVERVIEW ═══ -->
+  <section style="margin-bottom:32px">
+    <div class="section-label">ALL 10 TEAMS · CLICK TO FILTER</div>
+    <div class="team-overview-grid" id="teamOverviewGrid"></div>
+  </section>
+
+  <!-- ═══ CONTROLS ═══ -->
+  <div class="explorer-controls">
+    <div class="ctrl-group">
+      <label class="ctrl-label">SEARCH PLAYER</label>
+      <input type="text" id="searchInput" class="ctrl-input" placeholder="e.g. Virat, Bumrah…"/>
+    </div>
+    <div class="ctrl-group">
+      <label class="ctrl-label">ROLE</label>
+      <select id="roleFilter" class="ctrl-select">
+        <option value="">All Roles</option>
+        <option value="Batsman">Batsman</option>
+        <option value="WK-Batsman">WK-Batsman</option>
+        <option value="Allrounder">Allrounder</option>
+        <option value="Bowler">Bowler</option>
+      </select>
+    </div>
+    <div class="ctrl-group">
+      <label class="ctrl-label">NATIONALITY</label>
+      <select id="natFilter" class="ctrl-select">
+        <option value="">All Nationalities</option>
+      </select>
+    </div>
+    <button class="reset-btn" id="resetBtn">↺ RESET</button>
+  </div>
+
+  <!-- ═══ SUMMARY BAR ═══ -->
+  <div class="stats-summary" id="summaryBar"></div>
+
+  <!-- ═══ VIEW TOGGLE ═══ -->
+  <div class="view-toggle">
+    <button class="vt-btn active" data-view="table">📋 TABLE VIEW</button>
+    <button class="vt-btn" data-view="cards">🃏 CARD VIEW</button>
+    <button class="vt-btn" data-view="price">💰 PRICE CHART</button>
+  </div>
+
+  <!-- ═══ TABLE VIEW ═══ -->
+  <div id="view-table">
+    <div style="overflow-x:auto">
+      <table class="player-table" id="playerTable">
+        <thead>
+          <tr>
+            <th data-col="player">PLAYER</th>
+            <th data-col="team_short">TEAM</th>
+            <th data-col="role">ROLE</th>
+            <th data-col="nationality">NATIONALITY</th>
+            <th data-col="age">AGE</th>
+            <th data-col="batting_style">BAT</th>
+            <th data-col="bowling_style">BOWL STYLE</th>
+            <th data-col="price_cr">PRICE (₹Cr)</th>
+            <th data-col="is_overseas">TYPE</th>
+            <th data-col="is_captain">FLAGS</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+    <div class="pagination" id="pagination"></div>
+  </div>
+
+  <!-- ═══ CARD VIEW ═══ -->
+  <div id="view-cards" style="display:none">
+    <div class="squad-grid" id="cardGrid"></div>
+    <div class="pagination" id="cardPagination"></div>
+  </div>
+
+  <!-- ═══ PRICE CHART VIEW ═══ -->
+  <div id="view-price" style="display:none">
+    <div class="price-chart-wrap">
+      <div class="section-label">TOP 30 PLAYERS BY AUCTION PRICE (₹ CRORE)</div>
+      <div class="price-bars" id="priceBars"></div>
+    </div>
+    <div class="price-chart-wrap">
+      <div class="section-label">TOTAL SQUAD SPEND BY TEAM</div>
+      <div class="price-bars" id="teamSpendBars"></div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>IPL 2026 Squad Explorer · Data sourced from official IPL auction results (December 2025)</p>
+  <p>IPL Predictor · Probability & Statistics Project · Built with R + JavaScript</p>
+</footer>
+
+<script src="js/squad_data.js"></script>
+<script src="js/charts.js"></script>
+<script>
+// ============================================================
+//  Squad Explorer App
+// ============================================================
+
+const TEAM_COLORS = {
+  CSK:"#ffd740", MI:"#1e88e5", RCB:"#e53935", KKR:"#aa44ff",
+  SRH:"#ff6600", DC:"#2244ff", RR:"#ff44aa", LSG:"#00d4aa",
+  GT:"#00aaff",  PBKS:"#dd2222"
+};
+const TEAM_CAPTAINS = {
+  "Chennai Super Kings":"Ruturaj Gaikwad",
+  "Mumbai Indians":"Hardik Pandya",
+  "Royal Challengers Bengaluru":"Rajat Patidar",
+  "Kolkata Knight Riders":"Ajinkya Rahane",
+  "Sunrisers Hyderabad":"Pat Cummins",
+  "Delhi Capitals":"Axar Patel",
+  "Lucknow Super Giants":"Rishabh Pant",
+  "Rajasthan Royals":"Riyan Parag",
+  "Gujarat Titans":"Shubman Gill",
+  "Punjab Kings":"Shreyas Iyer"
+};
+
+// Flatten squad data into array
+const ALL_PLAYERS = Object.entries(SQUAD_DATA_2026).flatMap(([team, players]) =>
+  players.map(p => ({...p, team}))
+);
+
+// State
+let filtered = [...ALL_PLAYERS];
+let sortCol = "price_cr";
+let sortDir = "desc";
+let currentPage = 1;
+const PAGE_SIZE = 30;
+let activeView = "table";
+let activeTeam = null;
+
+// ── Build nationality filter ──────────────────────────────
+const nats = [...new Set(ALL_PLAYERS.map(p=>p.nationality))].sort();
+const natSel = document.getElementById("natFilter");
+nats.forEach(n => {
+  const o = document.createElement("option");
+  o.value = n; o.textContent = n;
+  natSel.appendChild(o);
+});
+
+// ── Team overview ─────────────────────────────────────────
+function buildTeamOverview() {
+  const grid = document.getElementById("teamOverviewGrid");
+  const teams = Object.keys(SQUAD_DATA_2026);
+  grid.innerHTML = teams.map(team => {
+    const players = SQUAD_DATA_2026[team];
+    const short = players[0]?.team_short || team.split(" ").map(w=>w[0]).join("").slice(0,3);
+    const color = TEAM_COLORS[short] || "#00e5ff";
+    const batsmen  = players.filter(p=>p.role.includes("Batsman")||p.role.includes("WK")).length;
+    const bowlers  = players.filter(p=>p.role==="Bowler").length;
+    const allrs    = players.filter(p=>p.role==="Allrounder").length;
+    const overseas = players.filter(p=>p.is_overseas).length;
+    const captain  = TEAM_CAPTAINS[team] || "—";
+    const maxRole  = players.length;
+
+    return `
+      <div class="team-overview-card" data-team="${team}" onclick="filterTeam('${team.replace(/'/g,"\\'")}', this)">
+        <div class="tov-name" style="color:${color}">${team}</div>
+        <div class="tov-short">${short} · ${players.length} players</div>
+        <div class="tov-bars">
+          <div class="tov-bar-row">
+            <span style="min-width:60px">BATTERS</span>
+            <div class="tov-bar-bg"><div class="tov-bar-fill" style="width:0%;background:${color}" data-w="${batsmen/maxRole*100}"></div></div>
+            <span>${batsmen}</span>
+          </div>
+          <div class="tov-bar-row">
+            <span style="min-width:60px">BOWLERS</span>
+            <div class="tov-bar-bg"><div class="tov-bar-fill" style="width:0%;background:#ff6644" data-w="${bowlers/maxRole*100}"></div></div>
+            <span>${bowlers}</span>
+          </div>
+          <div class="tov-bar-row">
+            <span style="min-width:60px">ALL-RND</span>
+            <div class="tov-bar-bg"><div class="tov-bar-fill" style="width:0%;background:#aa66ff" data-w="${allrs/maxRole*100}"></div></div>
+            <span>${allrs}</span>
+          </div>
+          <div class="tov-bar-row">
+            <span style="min-width:60px">OVERSEAS</span>
+            <div class="tov-bar-bg"><div class="tov-bar-fill" style="width:0%;background:#00ccff" data-w="${overseas/8*100}"></div></div>
+            <span>${overseas}/8</span>
+          </div>
+        </div>
+        <div class="tov-captain">© ${captain}</div>
+      </div>`;
+  }).join("");
+
+  setTimeout(() => {
+    document.querySelectorAll(".tov-bar-fill").forEach(el => {
+      el.style.width = el.dataset.w + "%";
+    });
+  }, 200);
+}
+
+function filterTeam(team, el) {
+  if (activeTeam === team) {
+    activeTeam = null;
+    document.querySelectorAll(".team-overview-card").forEach(c=>c.classList.remove("active"));
+  } else {
+    activeTeam = team;
+    document.querySelectorAll(".team-overview-card").forEach(c=>c.classList.remove("active"));
+    el.classList.add("active");
+  }
+  applyFilters();
+}
+
+// ── Filtering + sorting ───────────────────────────────────
+function applyFilters() {
+  const search = document.getElementById("searchInput").value.toLowerCase().trim();
+  const role   = document.getElementById("roleFilter").value;
+  const nat    = document.getElementById("natFilter").value;
+
+  filtered = ALL_PLAYERS.filter(p => {
+    if (activeTeam && p.team !== activeTeam) return false;
+    if (role && p.role !== role) return false;
+    if (nat  && p.nationality !== nat) return false;
+    if (search && !p.player.toLowerCase().includes(search) &&
+        !p.nationality.toLowerCase().includes(search) &&
+        !p.team.toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  // Sort
+  filtered.sort((a, b) => {
+    let av = a[sortCol], bv = b[sortCol];
+    if (typeof av === "boolean") av = av ? 1 : 0;
+    if (typeof bv === "boolean") bv = bv ? 1 : 0;
+    if (typeof av === "string") av = av.toLowerCase();
+    if (typeof bv === "string") bv = bv.toLowerCase();
+    if (av < bv) return sortDir === "asc" ? -1 : 1;
+    if (av > bv) return sortDir === "asc" ? 1  : -1;
+    return 0;
+  });
+
+  currentPage = 1;
+  updateSummary();
+  renderCurrentView();
+}
+
+function updateSummary() {
+  const total    = filtered.length;
+  const overseas = filtered.filter(p=>p.is_overseas).length;
+  const captains = filtered.filter(p=>p.is_captain).length;
+  const retained = filtered.filter(p=>p.is_retained).length;
+  const totalSpend = filtered.reduce((s,p)=>s+(p.price_cr||0),0);
+  const avgPrice = total > 0 ? (totalSpend/total).toFixed(1) : "0";
+
+  document.getElementById("summaryBar").innerHTML = `
+    <div class="sum-item"><div class="sum-val">${total}</div><div class="sum-lbl">PLAYERS</div></div>
+    <div class="sum-divider"></div>
+    <div class="sum-item"><div class="sum-val">${overseas}</div><div class="sum-lbl">OVERSEAS</div></div>
+    <div class="sum-divider"></div>
+    <div class="sum-item"><div class="sum-val">${retained}</div><div class="sum-lbl">RETAINED</div></div>
+    <div class="sum-divider"></div>
+    <div class="sum-item"><div class="sum-val">₹${totalSpend.toFixed(1)}Cr</div><div class="sum-lbl">TOTAL SPEND</div></div>
+    <div class="sum-divider"></div>
+    <div class="sum-item"><div class="sum-val">₹${avgPrice}Cr</div><div class="sum-lbl">AVG PRICE</div></div>
+    <div class="sum-divider"></div>
+    <div class="sum-item"><div class="sum-val">${captains}</div><div class="sum-lbl">CAPTAINS</div></div>
+  `;
+}
+
+// ── TABLE VIEW ────────────────────────────────────────────
+function renderTable() {
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const page  = filtered.slice(start, start + PAGE_SIZE);
+
+  const rows = page.map(p => {
+    const short = p.team_short || p.team.split(" ").map(w=>w[0]).join("").slice(0,3);
+    const color = TEAM_COLORS[short] || "#00e5ff";
+    const flags = [];
+    if (p.is_captain)  flags.push(`<span style="color:var(--gold);font-size:0.7rem" title="Captain">©</span>`);
+    if (p.is_retained) flags.push(`<span style="color:#00e676;font-size:0.7rem" title="Retained">R</span>`);
+    if (p.is_overseas) flags.push(`<span style="color:var(--cyan);font-size:0.7rem" title="Overseas">⚑</span>`);
+    const captainClass = p.is_captain ? "captain-row" : "";
+    const roleBg = {
+      "Batsman":"#00b4ff22","WK-Batsman":"#ffcc4422",
+      "Allrounder":"#aa66ff22","Bowler":"#ff664422"
+    }[p.role]||"transparent";
+    const roleColor = {
+      "Batsman":"#00b4ff","WK-Batsman":"#ffcc44",
+      "Allrounder":"#aa66ff","Bowler":"#ff6644"
+    }[p.role]||"var(--text)";
+
+    return `
+      <tr class="${captainClass}">
+        <td><strong>${p.player}</strong></td>
+        <td><span class="team-chip chip-${short}" style="color:${color}">${short}</span></td>
+        <td><span style="background:${roleBg};color:${roleColor};padding:2px 6px;border-radius:3px;font-size:0.62rem">${p.role}</span></td>
+        <td>${p.nationality}</td>
+        <td>${p.age}</td>
+        <td style="color:var(--text-dim)">${p.batting_style||"—"}</td>
+        <td style="color:var(--text-dim)">${p.bowling_style||"—"}</td>
+        <td style="color:var(--gold);font-weight:700">₹${p.price_cr}</td>
+        <td>${p.is_overseas?`<span style="color:var(--cyan)">Overseas</span>`:`<span style="color:var(--text-muted)">Domestic</span>`}</td>
+        <td>${flags.join(" ")}</td>
+      </tr>`;
+  }).join("");
+
+  document.getElementById("tableBody").innerHTML = rows;
+  renderPagination("pagination");
+}
+
+// ── CARD VIEW ─────────────────────────────────────────────
+function renderCards() {
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const page  = filtered.slice(start, start + PAGE_SIZE);
+  const roleEmojis = {"Batsman":"🏏","WK-Batsman":"🧤","Allrounder":"⚡","Bowler":"⚾"};
+  const roleClasses= {"Batsman":"role-batsman","WK-Batsman":"role-wk","Allrounder":"role-allrounder","Bowler":"role-bowler"};
+
+  const cards = page.map(p => {
+    const short  = p.team_short || "???";
+    const color  = TEAM_COLORS[short] || "#00e5ff";
+    const emoji  = roleEmojis[p.role]||"🏏";
+    const rclass = roleClasses[p.role]||"";
+    const badges = [];
+    if (p.is_captain)  badges.push(`<span style="background:#ffd74022;color:var(--gold);border:1px solid #ffd74044;font-family:var(--font-mono);font-size:0.55rem;padding:2px 6px;border-radius:3px">© CAPTAIN</span>`);
+    if (p.is_retained) badges.push(`<span style="background:#00e67622;color:#00e676;border:1px solid #00e67644;font-family:var(--font-mono);font-size:0.55rem;padding:2px 6px;border-radius:3px">RETAINED</span>`);
+    if (p.is_overseas) badges.push(`<span style="background:#00e5ff22;color:var(--cyan);border:1px solid #00e5ff44;font-family:var(--font-mono);font-size:0.55rem;padding:2px 6px;border-radius:3px">OVERSEAS</span>`);
+
+    return `
+      <div class="player-card" style="border-top:2px solid ${color}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+          <div class="player-name">${emoji} ${p.player}</div>
+          <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--gold);font-weight:700">₹${p.price_cr}Cr</span>
+        </div>
+        <div class="player-meta">
+          <span class="role-pill ${rclass}">${p.role}</span>
+          <span style="font-family:var(--font-mono);font-size:0.6rem;color:${color}">${short}</span>
+          <span class="nationality-flag">${p.nationality} · Age ${p.age}</span>
+        </div>
+        <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">${badges.join("")}</div>
+        <div style="background:var(--bg3);border-radius:4px;padding:10px;display:flex;flex-direction:column;gap:4px">
+          <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--text-dim)">🏏 ${p.batting_style||"—"}</div>
+          <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--text-dim)">⚾ ${p.bowling_style||"—"}</div>
+        </div>
+      </div>`;
+  }).join("");
+
+  document.getElementById("cardGrid").innerHTML = cards;
+  renderPagination("cardPagination");
+}
+
+// ── PRICE CHART VIEW ──────────────────────────────────────
+function renderPriceChart() {
+  // Top 30 by price
+  const top30 = [...filtered].sort((a,b)=>b.price_cr-a.price_cr).slice(0,30);
+  const maxP  = top30[0]?.price_cr || 27;
+
+  document.getElementById("priceBars").innerHTML = top30.map(p => {
+    const short = p.team_short || "???";
+    const color = TEAM_COLORS[short] || "#00e5ff";
+    const pct   = (p.price_cr / maxP * 100).toFixed(1);
+    return `
+      <div class="price-bar-row">
+        <div class="price-player-name">${p.is_captain?"© ":""}${p.player}</div>
+        <div class="price-bar-bg">
+          <div class="price-bar-fill" style="width:0%;background:${color}" data-w="${pct}">
+            <span style="font-family:var(--font-mono);font-size:0.58rem;color:#000;white-space:nowrap;overflow:hidden">${short}</span>
+          </div>
+        </div>
+        <div class="price-val">₹${p.price_cr}Cr</div>
+      </div>`;
+  }).join("");
+
+  // Team spend
+  const teamSpend = {};
+  filtered.forEach(p => {
+    teamSpend[p.team] = (teamSpend[p.team]||0) + (p.price_cr||0);
+  });
+  const maxSpend = Math.max(...Object.values(teamSpend));
+  const sortedTeams = Object.entries(teamSpend).sort((a,b)=>b[1]-a[1]);
+
+  document.getElementById("teamSpendBars").innerHTML = sortedTeams.map(([team,spend]) => {
+    const sq    = SQUAD_DATA_2026[team]||[];
+    const short = sq[0]?.team_short || team.split(" ").map(w=>w[0]).join("").slice(0,3);
+    const color = TEAM_COLORS[short] || "#00e5ff";
+    const pct   = (spend / maxSpend * 100).toFixed(1);
+    return `
+      <div class="price-bar-row">
+        <div class="price-player-name">${team}</div>
+        <div class="price-bar-bg">
+          <div class="price-bar-fill" style="width:0%;background:${color}" data-w="${pct}">
+            <span style="font-family:var(--font-mono);font-size:0.58rem;color:#000">${short}</span>
+          </div>
+        </div>
+        <div class="price-val">₹${spend.toFixed(1)}Cr</div>
+      </div>`;
+  }).join("");
+
+  setTimeout(() => {
+    document.querySelectorAll(".price-bar-fill").forEach(el => {
+      el.style.width = el.dataset.w + "%";
+    });
+  }, 200);
+}
+
+// ── Pagination ────────────────────────────────────────────
+function renderPagination(containerId) {
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const el = document.getElementById(containerId);
+  if (totalPages <= 1) { el.innerHTML = ""; return; }
+
+  let html = `<button class="pg-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?"disabled":""}>← PREV</button>`;
+  const start = Math.max(1, currentPage - 2);
+  const end   = Math.min(totalPages, currentPage + 2);
+  if (start > 1) html += `<button class="pg-btn" onclick="goPage(1)">1</button><span class="pg-info">…</span>`;
+  for (let i = start; i <= end; i++) {
+    html += `<button class="pg-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  if (end < totalPages) html += `<span class="pg-info">…</span><button class="pg-btn" onclick="goPage(${totalPages})">${totalPages}</button>`;
+  html += `<button class="pg-btn" onclick="goPage(${currentPage+1})" ${currentPage===totalPages?"disabled":""}>NEXT →</button>`;
+  html += `<span class="pg-info">${(currentPage-1)*PAGE_SIZE+1}–${Math.min(currentPage*PAGE_SIZE,filtered.length)} of ${filtered.length}</span>`;
+  el.innerHTML = html;
+}
+function goPage(p) {
+  const total = Math.ceil(filtered.length / PAGE_SIZE);
+  currentPage = Math.max(1, Math.min(p, total));
+  renderCurrentView();
+  window.scrollTo({top:300, behavior:"smooth"});
+}
+
+// ── Sort ──────────────────────────────────────────────────
+function setupSort() {
+  document.querySelectorAll(".player-table th[data-col]").forEach(th => {
+    th.addEventListener("click", () => {
+      const col = th.dataset.col;
+      if (sortCol === col) sortDir = sortDir === "asc" ? "desc" : "asc";
+      else { sortCol = col; sortDir = "asc"; }
+      document.querySelectorAll(".player-table th").forEach(h => h.classList.remove("sort-asc","sort-desc"));
+      th.classList.add(sortDir === "asc" ? "sort-asc" : "sort-desc");
+      applyFilters();
+    });
+  });
+}
+
+// ── View switching ────────────────────────────────────────
+function renderCurrentView() {
+  if (activeView === "table") renderTable();
+  else if (activeView === "cards") renderCards();
+  else renderPriceChart();
+}
+
+document.querySelectorAll(".vt-btn[data-view]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".vt-btn[data-view]").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    activeView = btn.dataset.view;
+    ["table","cards","price"].forEach(v => {
+      document.getElementById(`view-${v}`).style.display = v===activeView?"block":"none";
+    });
+    currentPage = 1;
+    renderCurrentView();
+  });
+});
+
+// ── Event listeners ───────────────────────────────────────
+document.getElementById("searchInput").addEventListener("input", applyFilters);
+document.getElementById("roleFilter").addEventListener("change", applyFilters);
+document.getElementById("natFilter").addEventListener("change", applyFilters);
+document.getElementById("resetBtn").addEventListener("click", () => {
+  document.getElementById("searchInput").value = "";
+  document.getElementById("roleFilter").value = "";
+  document.getElementById("natFilter").value = "";
+  activeTeam = null;
+  document.querySelectorAll(".team-overview-card").forEach(c=>c.classList.remove("active"));
+  applyFilters();
+});
+
+// ── Init ──────────────────────────────────────────────────
+buildTeamOverview();
+setupSort();
+// Set default sort header
+document.querySelector('[data-col="price_cr"]')?.classList.add("sort-desc");
+applyFilters();
+</script>
+</body>
+</html>
